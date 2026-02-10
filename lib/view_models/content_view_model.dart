@@ -147,11 +147,12 @@ class ContentViewModel extends ChangeNotifier {
         return;
       }
 
-      _appendLog("客戶端連線到 $_host:$p，傳送 $size MB...");
+      _appendLog("客戶端連線到 $_host:$p，傳送 $size MB (4 平行串流)...");
       _tester!.runClient(
         host: _host,
         port: p,
         totalSizeMB: size,
+        concurrency: 4,
         progress: (sent) {
           double percent = sent / (size * 1024 * 1024) * 100;
           _progressText = "進度 ${percent.toStringAsFixed(1)}%";

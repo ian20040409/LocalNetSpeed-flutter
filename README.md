@@ -14,6 +14,16 @@ A high-performance local network speed testing tool built with Flutter. This app
 - **Real-time Metrics**: Live speed gauge and progress tracking.
 - **Gigabit Evaluation**: Identifies if your network environment supports Gigabit speeds.
 
+## Speed Calculation Algorithm
+
+This application utilizes an advanced speed calculation algorithm inspired by **Ookla Speedtest** to ensure accurate and stable results, minimizing the impact of network jitter and slow start:
+
+1.  **Sampling**: Instantaneous speed samples are collected periodically (every ~100ms) throughout the duration of the test.
+2.  **Filtering**:
+    *   **Top 10% Discarded**: The fastest 10% of samples are removed to eliminate unrealistic spikes caused by system buffering.
+    *   **Bottom 30% Discarded**: The slowest 30% of samples are removed to filter out the "TCP Slow Start" phase and initial ramp-up.
+3.  **Averaging**: The final result is derived from the average of the remaining **middle 60%** of samples, providing a robust measure of sustained throughput.
+
 ## Getting Started
 
 ### Prerequisites
