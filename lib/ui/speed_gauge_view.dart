@@ -29,9 +29,16 @@ class _SpeedGaugeViewState extends State<SpeedGaugeView> with SingleTickerProvid
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    _animation = Tween<double>(begin: 0, end: 0).animate(
+
+    double begin = 0;
+    double end = (widget.speed / widget.maxSpeed).clamp(0.0, 1.0);
+    
+    _animation = Tween<double>(begin: begin, end: end).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
+    
+    _controller.forward();
+    _oldProgress = end;
   }
 
   @override

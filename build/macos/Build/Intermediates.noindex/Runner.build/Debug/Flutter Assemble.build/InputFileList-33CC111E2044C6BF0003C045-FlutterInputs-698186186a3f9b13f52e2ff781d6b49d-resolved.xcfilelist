@@ -694,6 +694,7 @@
 /Users/linenyou/Github/LocalNetSpeed-flutter/lib/services/speed_tester.dart
 /Users/linenyou/Github/LocalNetSpeed-flutter/lib/ui/content_view.dart
 /Users/linenyou/Github/LocalNetSpeed-flutter/lib/ui/log_view.dart
+/Users/linenyou/Github/LocalNetSpeed-flutter/lib/ui/result_window.dart
 /Users/linenyou/Github/LocalNetSpeed-flutter/lib/ui/speed_gauge_view.dart
 /Users/linenyou/Github/LocalNetSpeed-flutter/lib/view_models/content_view_model.dart
 /Users/linenyou/Github/LocalNetSpeed-flutter/pubspec.yaml
