@@ -1,4 +1,4 @@
-package com.example.localnetspeed_flutter
+package com.lnu.localnetspeed
 
 import io.flutter.embedding.android.FlutterActivity
 
