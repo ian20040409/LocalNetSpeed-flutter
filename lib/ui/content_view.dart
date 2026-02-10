@@ -90,16 +90,6 @@ class _ContentViewState extends State<ContentView> {
             },
             tooltip: "日誌",
           ),
-          IconButton(
-            icon: const Icon(Icons.public),
-            onPressed: () {
-               // Fast.com placeholder
-               ScaffoldMessenger.of(context).showSnackBar(
-                 const SnackBar(content: Text("請使用瀏覽器訪問 fast.com")),
-               );
-            },
-            tooltip: "Fast.com",
-          ),
         ],
       ),
       body: GestureDetector(

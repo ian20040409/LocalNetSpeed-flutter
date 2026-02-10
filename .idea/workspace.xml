@@ -5,22 +5,109 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="208fac2e-0f2b-4f03-a710-6aabe3f58102" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b8a02098836376f057cb636a2bf3d300/.filecache" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/b8a02098836376f057cb636a2bf3d300/.filecache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b8a02098836376f057cb636a2bf3d300/app.dill" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/b8a02098836376f057cb636a2bf3d300/app.dill" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b8a02098836376f057cb636a2bf3d300/kernel_snapshot_program.d" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/b8a02098836376f057cb636a2bf3d300/kernel_snapshot_program.d" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b8a02098836376f057cb636a2bf3d300/kernel_snapshot_program.stamp" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/b8a02098836376f057cb636a2bf3d300/kernel_snapshot_program.stamp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/package_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/package_config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/package_graph.json" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/package_graph.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.metadata" beforeDir="false" afterPath="$PROJECT_DIR$/.metadata" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/6c6c28c41445d15d6de537ed04c1e83a.cache.dill.track.dill" beforeDir="false" afterPath="$PROJECT_DIR$/build/6c6c28c41445d15d6de537ed04c1e83a.cache.dill.track.dill" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/Pods.build/Debug/network_info_plus.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata" beforeDir="false" afterPath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/Pods.build/Debug/network_info_plus.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/Runner.build/Debug/Flutter Assemble.build/InputFileList-33CC111E2044C6BF0003C045-FlutterInputs-698186186a3f9b13f52e2ff781d6b49d-resolved.xcfilelist" beforeDir="false" afterPath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/Runner.build/Debug/Flutter Assemble.build/InputFileList-33CC111E2044C6BF0003C045-FlutterInputs-698186186a3f9b13f52e2ff781d6b49d-resolved.xcfilelist" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/Runner.build/Debug/Runner.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata" beforeDir="false" afterPath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/Runner.build/Debug/Runner.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/01de6e08a6f26de3223dc923b6df6411" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/0791c62029e599dc5be65e3690a620e1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/0e37b12519cfd811a004faf97da4b120" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/0fd3c14c9feb429f2c58fd2d03ddc8c5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/36de543e6b53f277b9b1c6ef7b984102" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/46339354a6c39af5270ed79090b4bd7c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/48128a643e143918b15cee1a686f54ee" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/49f63ba92ab41f81d20711b7d6a5b252" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/4a4d8b323fb25206fc5fb1b1de712166" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/526e76ff0ec6eafee46bce9c15295adf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/57451cf4309b6f3cde2e2f484c593df9" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/625e69bafc97301c6a5b1f0e3383b4d4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/6652f3cc39abe790f65451fd1e98f811" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/66c68c904116cced5f177349e1081be8" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/67e76468a8cd78f03ef5535f8fd0ab00" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/6c7bfdae797934aad4419522d1c3f1e0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/6f8d975aecb0bb59a8aa9410b577e31d" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/72abd9aee9ffa0723798fadcd662aa18" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/73224f1975171bcf2a60957eb6b7023b" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/87ff677463cdb4d415bb72089e951c49" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/8b234ef5acafbfa1d1f7eeafcb0d8b07" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/8bba4233626f64a7ea772bb94a08a1a9" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/a260bb8b736bb6b3860873670d49a4aa" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/a8837f06a943a4dcbf0c27d851e8b1b6" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/ac0334ade38b7af833ed20aadef2c903" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/adb424f1552a64a143ce7b7f1901fd4c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/b02a6badc70ee66853dc03ab3bfc87ca" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/b5c347a1c14733177577aaf3a8bce392" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/b6ece4693b49a022f5f1f9d589fc233c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/b88c1eb3034367e308ffe2f72901d248" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/bb94fc515189b00485bc317eaf2afb41" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/c04acb6100c18f32d74c6eecea0060dc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/c12acc82cb7c6562ef14d6e7fc538d4c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/c599d51920b7c23b592218dceb014eed" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/c806aed9f1cd5290614d49f9288403f9" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/c8c25c8d946bbe339a9dad58da62b6df" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/c9f70e334ed49d4089d4c6b0b655f71c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/ccc4c36d9ae391c5ac30d3ce824d5638" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/cde3a1b572c7c86d07bf20f2f8324a6c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/ce2a330791fb1c4932457e0e6d2807a1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/d13efde15a2ce74a330c2d032d66fdda" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/d41d8cd98f00b204e9800998ecf8427e" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/dda44dc9f4f0c55897c2d385e1247a04" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/e855caab43a09c425971a291d949781e" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/e9d022b95f5afe95cf9debcddc42f0d0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/ef9e0ef6d99decc3cbb841d2fcfd57ed" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/f827fcd8259c333ea58d028b28e958e9" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/fa17059944b8ce3b9cbb72e04bf736ea" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/attachments/fd8314defc70a8778956f026c0ddfd19" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/build-request.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/description.msgpack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/target-graph.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/67f79309d651764c762ac1dbf448a9ea.xcbuilddata/task-store.msgpack" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/build.db" beforeDir="false" afterPath="$PROJECT_DIR$/build/macos/Build/Intermediates.noindex/XCBuildData/build.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/macos/Build/Products/Debug/.last_build_id" beforeDir="false" afterPath="$PROJECT_DIR$/build/macos/Build/Products/Debug/.last_build_id" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/macos/Build/Products/Debug/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/macos/Build/Products/Debug/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/macos/ModuleCache.noindex/Session.modulevalidation" beforeDir="false" afterPath="$PROJECT_DIR$/build/macos/ModuleCache.noindex/Session.modulevalidation" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/macos/SDKStatCaches.noindex/macosx26.2-25C57-00fa09913b459cbbc988d1f6730289ae.sdkstatcache" beforeDir="false" afterPath="$PROJECT_DIR$/build/macos/SDKStatCaches.noindex/macosx26.2-25C57-00fa09913b459cbbc988d1f6730289ae.sdkstatcache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/macos/info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/build/macos/info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/speed_gauge_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/speed_gauge_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/localnetspeed_flutter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/localnetspeed_flutter.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/ui/content_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/content_view.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/favicon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/icons/Icon-192.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/icons/Icon-512.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/icons/Icon-maskable-192.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/icons/Icon-maskable-512.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/windows/runner/resources/app_icon.ico" beforeDir="false" afterPath="$PROJECT_DIR$/windows/runner/resources/app_icon.ico" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
