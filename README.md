@@ -16,13 +16,15 @@ A high-performance local network speed testing tool built with Flutter. This app
 
 ## Speed Calculation Algorithm
 
-This application utilizes an advanced speed calculation algorithm inspired by **Ookla Speedtest** to ensure accurate and stable results, minimizing the impact of network jitter and slow start:
+This application utilizes a robust **Sequential Trimmed Mean** algorithm designed specifically for high-bandwidth local networks (LAN). This ensures accurate and stable results by effectively filtering out TCP slow-start phases and OS buffer spikes:
 
 1.  **Sampling**: Instantaneous speed samples are collected periodically (every ~100ms) throughout the duration of the test.
-2.  **Filtering**:
-    *   **Top 10% Discarded**: The fastest 10% of samples are removed to eliminate unrealistic spikes caused by system buffering.
-    *   **Bottom 30% Discarded**: The slowest 30% of samples are removed to filter out the "TCP Slow Start" phase and initial ramp-up.
-3.  **Averaging**: The final result is derived from the average of the remaining **middle 60%** of samples, providing a robust measure of sustained throughput.
+2.  **Sequential Warm-up (Time-Domain)**:
+    *   The first **20%** of samples are discarded to ignore the "TCP Slow Start" phase, ensuring the metric reflects the network's steady-state capacity rather than its ramp-up curve.
+3.  **Stability Trimming (Value-Domain)**:
+    *   **Top 10% Discarded**: Filters out "Buffer Bloat" spikes where OS buffering causes speed readings to briefly exceed physical link capacity.
+    *   **Bottom 5% Discarded**: Filters out minor system jitter and noise during the steady state.
+4.  **Averaging**: The final result is derived from the average of the remaining steady, clean samples.
 
 ## Getting Started
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../models/speed_test_result.dart';
 import 'gigabit_evaluator.dart';
@@ -20,14 +19,14 @@ class SpeedTester {
   // Server state for aggregation
   int _serverTotalReceivedBytes = 0;
   DateTime? _serverTestStartTime;
+  int _activeConnections = 0; // Track active streams for session management
   
   // Speed Sampling for Ookla Algorithm
-  List<double> _speedSamples = [];
+  final List<double> _speedSamples = [];
   int _lastSampleBytes = 0;
   DateTime? _lastSampleTime;
 
   // Retry state
-  int _currentRetryAttempt = 0;
   Timer? _retryTimer;
   Timer? _connectionTimeoutTimer;
 
@@ -49,10 +48,16 @@ class SpeedTester {
       _clientSockets.clear();
     }
     
-    _currentRetryAttempt = 0;
+    _resetServerSession();
+    _activeConnections = 0;
+  }
+
+  void _resetServerSession() {
     _serverTotalReceivedBytes = 0;
     _serverTestStartTime = null;
     _speedSamples.clear();
+    _lastSampleBytes = 0;
+    _lastSampleTime = DateTime.now();
   }
 
   // --- Server ---
@@ -69,13 +74,10 @@ class SpeedTester {
     }
 
     _isCancelled = false;
-    _serverTotalReceivedBytes = 0;
-    _serverTestStartTime = null;
-    _speedSamples.clear();
-    _lastSampleBytes = 0;
-    _lastSampleTime = DateTime.now();
+    _activeConnections = 0;
+    _resetServerSession();
 
-    int connectionCount = 0;
+    int totalConnectionCounter = 0;
 
     try {
       _serverSocket = await ServerSocket.bind(InternetAddress.anyIPv4, port);
@@ -90,17 +92,19 @@ class SpeedTester {
         return;
       }
 
-      connectionCount++;
-      if (onNewConnection != null) {
-        onNewConnection(connectionCount);
-      }
-      
-      // Start global timer on first connection
-      if (_serverTestStartTime == null) {
+      // Start of a new session (first stream)
+      if (_activeConnections == 0) {
+        _resetServerSession();
         _serverTestStartTime = DateTime.now();
         _lastSampleTime = _serverTestStartTime;
       }
+      _activeConnections++;
 
+      totalConnectionCounter++;
+      if (onNewConnection != null) {
+        onNewConnection(totalConnectionCounter);
+      }
+      
       // Optimization: Disable Nagle's algorithm for receiving socket too
       socket.setOption(SocketOption.tcpNoDelay, true);
 
@@ -122,199 +126,208 @@ class SpeedTester {
           }
         },
         onError: (error) {
+          _activeConnections--;
           socket.destroy();
+           if (_activeConnections == 0) {
+             // If all streams failed or closed, we might want to signal something
+             // For now, we rely on the logic that at least one might succeed or the user cancels
+           }
         },
         onDone: () {
-          DateTime endTime = DateTime.now();
-          DateTime start = _serverTestStartTime ?? endTime;
-          double duration = endTime.difference(start).inMicroseconds / 1000000.0;
-          
-          // Use Ookla algorithm for speed if possible, else fallback to avg
-          double speed = _calculateOoklaSpeed();
-          if (speed == 0) {
-             speed = (_serverTotalReceivedBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
-          }
-          
-          var eval = GigabitEvaluator.evaluate(speed);
-          var result = SpeedTestResult(
-            transferredBytes: _serverTotalReceivedBytes,
-            duration: duration,
-            startedAt: start,
-            endedAt: endTime,
-            evaluation: eval,
-          );
-          
-          completion(Result.success(result));
-          
+          _activeConnections--;
           socket.destroy();
-        },
-        cancelOnError: true,
-      );
-    }, onError: (error) {
-      if (!_isCancelled) {
-        completion(Result.failure(error));
-      }
-    });
-  }
 
-  // --- Client ---
-
-  Future<void> runClient({
-    required String host,
-    required int port,
-    required int totalSizeMB,
-    required Function(int) progress,
-    required Function(Result<SpeedTestResult>) completion,
-    Function(int, int)? retryStatus,
-    bool enableRetry = true,
-    int concurrency = 4, // Default to 4 parallel streams
-  }) async {
-    if (kIsWeb) {
-      completion(Result.failure(Exception("Web platform does not support TCP Client Sockets.")));
-      return;
-    }
-
-    _isCancelled = false;
-    _currentRetryAttempt = 0;
-    _clientSockets.clear();
-    _speedSamples.clear();
-    _lastSampleBytes = 0;
-    _lastSampleTime = DateTime.now();
-
-    // Divide total size among streams
-    int sizePerStream = (totalSizeMB / concurrency).ceil();
-    if (sizePerStream < 1) sizePerStream = 1;
-
-    List<Future<void>> futures = [];
-    // Shared progress tracking
-    List<int> streamProgress = List.filled(concurrency, 0);
-    DateTime startTime = DateTime.now();
-    _lastSampleTime = startTime;
-
-    for (int i = 0; i < concurrency; i++) {
-       int streamIndex = i;
-       futures.add(_attemptSingleStream(
-         streamIndex: streamIndex,
-         host: host,
-         port: port,
-         sizeMB: sizePerStream,
-         onProgress: (bytes) {
-           streamProgress[streamIndex] = bytes;
-           int total = streamProgress.reduce((a, b) => a + b);
-           progress(total);
-           
-           // Sample speed (approximate, driven by stream updates)
-           // We might sample too often if we do it for every stream update.
-           // Better to throttle sampling or do it based on total.
-           DateTime now = DateTime.now();
-           if (_lastSampleTime != null && now.difference(_lastSampleTime!).inMilliseconds > 100) {
-              _addSample(total, now);
-           }
-         },
-         enableRetry: enableRetry,
-         retryStatus: retryStatus,
-       ));
-    }
-
-    try {
-      await Future.wait(futures);
-      
-      // All done
-      if (!_isCancelled) {
-        DateTime endTime = DateTime.now();
-        int totalBytes = streamProgress.reduce((a, b) => a + b);
-        double duration = endTime.difference(startTime).inMicroseconds / 1000000.0;
-        
-        // Use Ookla algorithm
-        double speed = _calculateOoklaSpeed();
-        if (speed == 0) {
-           speed = (totalBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
-        }
-        
-        var eval = GigabitEvaluator.evaluate(speed);
-        var result = SpeedTestResult(
-          transferredBytes: totalBytes,
-          duration: duration,
-          startedAt: startTime,
-          endedAt: endTime,
-          evaluation: eval,
-        );
-        completion(Result.success(result));
-      }
-    } catch (e) {
-      completion(Result.failure(e));
-    }
-  }
-
-  // --- Helpers ---
-  
-  void _addSample(int currentBytes, DateTime now) {
-    if (_lastSampleTime == null) {
-      _lastSampleTime = now;
-      _lastSampleBytes = currentBytes;
-      return;
-    }
-
-    int diffMicros = now.difference(_lastSampleTime!).inMicroseconds;
-    if (diffMicros > 0) {
-      int diffBytes = currentBytes - _lastSampleBytes;
-      // Calculate MB/s
-      double speed = (diffBytes / 1024 / 1024) / (diffMicros / 1000000.0);
-      
-      // Filter unrealistic spikes (e.g., > 10 Gbps) caused by buffering
-      if (speed > 0 && speed < 10000) { 
-         _speedSamples.add(speed);
-      }
-      
-      _lastSampleBytes = currentBytes;
-      _lastSampleTime = now;
-    }
-  }
-
-  double _calculateOoklaSpeed() {
-    if (_speedSamples.isEmpty) return 0.0;
-
-    // Sort descending
-    _speedSamples.sort((a, b) => b.compareTo(a));
-
-    int total = _speedSamples.length;
-    // If not enough samples, use simple average
-    if (total < 5) {
-       return _speedSamples.reduce((a, b) => a + b) / total;
-    }
-
-    // Ookla Logic:
-    // Discard top 10% (outliers)
-    // Discard bottom 30% (slow start/ramp up)
-    // Average the middle 60%
-    
-    int start = (total * 0.1).ceil(); // Skip top 10%
-    int end = (total * 0.7).floor();  // Stop before bottom 30% (keep top 70% range, but start is shifted)
-    
-    // Correction:
-    // We want the range [10% ... 70%] of the SORTED DESCENDING array.
-    // Index 0 is Max.
-    // Index Total-1 is Min.
-    // 0..10% are largest (discard).
-    // 70%..100% are smallest (discard).
-    
-    // Ensure valid range
-    if (start >= end) {
-       // Fallback to average of all if filtering removes everything
-       return _speedSamples.reduce((a, b) => a + b) / total;
-    }
-
-    double sum = 0;
-    int count = 0;
-    for (int i = start; i < end; i++) {
-      sum += _speedSamples[i];
-      count++;
-    }
-
-    return count > 0 ? sum / count : 0.0;
-  }
-
-  Future<void> _attemptSingleStream({
+          // End of session (last stream)
+          if (_activeConnections == 0) {
+            DateTime endTime = DateTime.now();
+            DateTime start = _serverTestStartTime ?? endTime;
+            double duration = endTime.difference(start).inMicroseconds / 1000000.0;
+            
+                      // Use Smart LAN algorithm for speed if possible, else fallback to avg
+                      double speed = _calculateSmartSpeed();
+                      if (speed == 0) {
+                         speed = (_serverTotalReceivedBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
+                      }
+                      
+                      var eval = GigabitEvaluator.evaluate(speed);
+                      var result = SpeedTestResult(
+                        transferredBytes: _serverTotalReceivedBytes,
+                        duration: duration,
+                        startedAt: start,
+                        endedAt: endTime,
+                        evaluation: eval,
+                      );
+                      
+                      completion(Result.success(result));
+                      }
+                    },
+                    cancelOnError: true,
+                  );
+                }, onError: (error) {
+                  if (!_isCancelled) {
+                    completion(Result.failure(error));
+                  }
+                });
+              }
+            
+              // --- Client ---
+            
+              Future<void> runClient({
+                required String host,
+                required int port,
+                required int totalSizeMB,
+                required Function(int) progress,
+                required Function(Result<SpeedTestResult>) completion,
+                Function(int, int)? retryStatus,
+                bool enableRetry = true,
+                int concurrency = 4, // Default to 4 parallel streams
+              }) async {
+                if (kIsWeb) {
+                  completion(Result.failure(Exception("Web platform does not support TCP Client Sockets.")));
+                  return;
+                }
+            
+                _isCancelled = false;
+                _clientSockets.clear();
+                _speedSamples.clear();
+                _lastSampleBytes = 0;
+                _lastSampleTime = DateTime.now();
+            
+                // Divide total size among streams
+                int sizePerStream = (totalSizeMB / concurrency).ceil();
+                if (sizePerStream < 1) sizePerStream = 1;
+            
+                List<Future<void>> futures = [];
+                // Shared progress tracking
+                List<int> streamProgress = List.filled(concurrency, 0);
+                DateTime startTime = DateTime.now();
+                _lastSampleTime = startTime;
+            
+                for (int i = 0; i < concurrency; i++) {
+                   int streamIndex = i;
+                   futures.add(_attemptStreamWithRetry(
+                     streamIndex: streamIndex,
+                     host: host,
+                     port: port,
+                     sizeMB: sizePerStream,
+                     onProgress: (bytes) {
+                       streamProgress[streamIndex] = bytes;
+                       int total = streamProgress.reduce((a, b) => a + b);
+                       progress(total);
+                       
+                       DateTime now = DateTime.now();
+                       if (_lastSampleTime != null && now.difference(_lastSampleTime!).inMilliseconds > 100) {
+                          _addSample(total, now);
+                       }
+                     },
+                     enableRetry: enableRetry,
+                     retryStatus: retryStatus,
+                   ));
+                }
+            
+                try {
+                  await Future.wait(futures);
+                  
+                  // All done
+                  if (!_isCancelled) {
+                    DateTime endTime = DateTime.now();
+                    int totalBytes = streamProgress.reduce((a, b) => a + b);
+                    double duration = endTime.difference(startTime).inMicroseconds / 1000000.0;
+                    
+                    // Use Smart LAN algorithm
+                    double speed = _calculateSmartSpeed();
+                    if (speed == 0) {
+                       speed = (totalBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
+                    }
+                    
+                    var eval = GigabitEvaluator.evaluate(speed);
+                    var result = SpeedTestResult(
+                      transferredBytes: totalBytes,
+                      duration: duration,
+                      startedAt: startTime,
+                      endedAt: endTime,
+                      evaluation: eval,
+                    );
+                    completion(Result.success(result));
+                  }
+                } catch (e) {
+                  if (!_isCancelled) {
+                     completion(Result.failure(e));
+                  }
+                }
+              }
+            
+              // --- Helpers ---
+              
+              void _addSample(int currentBytes, DateTime now) {
+                if (_lastSampleTime == null) {
+                  _lastSampleTime = now;
+                  _lastSampleBytes = currentBytes;
+                  return;
+                }
+            
+                int diffMicros = now.difference(_lastSampleTime!).inMicroseconds;
+                if (diffMicros > 0) {
+                  int diffBytes = currentBytes - _lastSampleBytes;
+                  // Calculate MB/s
+                  double speed = (diffBytes / 1024 / 1024) / (diffMicros / 1000000.0);
+                  
+                  // Filter unrealistic spikes (e.g., > 10 Gbps) caused by buffering
+                  if (speed > 0 && speed < 10000) { 
+                     _speedSamples.add(speed);
+                  }
+                  
+                  _lastSampleBytes = currentBytes;
+                  _lastSampleTime = now;
+                }
+              }
+            
+              double _calculateSmartSpeed() {
+                if (_speedSamples.isEmpty) return 0.0;
+            
+                int total = _speedSamples.length;
+                // If not enough samples, use simple average
+                if (total < 10) {
+                   return _speedSamples.reduce((a, b) => a + b) / total;
+                }
+            
+                // 1. Sequential Warm-up (Time-Domain Filter)
+                // Ignore the first 20% of samples to filter out TCP Slow Start
+                int warmupCount = (total * 0.2).ceil();
+                List<double> steadyStateSamples = _speedSamples.sublist(warmupCount);
+            
+                if (steadyStateSamples.isEmpty) {
+                  return _speedSamples.reduce((a, b) => a + b) / total;
+                }
+            
+                // 2. Outlier Filter (Value-Domain Filter)
+                // Sort the steady state samples to identify spikes and noise
+                steadyStateSamples.sort((a, b) => b.compareTo(a)); // Descending
+            
+                int steadyTotal = steadyStateSamples.length;
+                // Discard Top 10% (OS Buffering Spikes)
+                int trimTop = (steadyTotal * 0.1).ceil();
+                // Discard Bottom 5% (Minor Noise/Jitter)
+                int trimBottom = (steadyTotal * 0.05).ceil();
+            
+                int start = trimTop;
+                int end = steadyTotal - trimBottom;
+            
+                if (start >= end) {
+                   return steadyStateSamples.reduce((a, b) => a + b) / steadyTotal;
+                }
+            
+                // 3. Average the remaining core samples
+                double sum = 0;
+                int count = 0;
+                for (int i = start; i < end; i++) {
+                  sum += steadyStateSamples[i];
+                  count++;
+                }
+            
+                return count > 0 ? sum / count : 0.0;
+              }
+  Future<void> _attemptStreamWithRetry({
     required int streamIndex,
     required String host,
     required int port,
@@ -323,30 +336,60 @@ class SpeedTester {
     required bool enableRetry,
     Function(int, int)? retryStatus,
   }) async {
-     // Basic retry logic for a single stream is complex to coordinate with global state.
-     // For now, if one stream fails, we let it fail or simple retry locally.
-     // We will reuse the core logic but adapted for parallel execution.
-     
+    int attempts = 0;
+    int maxAttempts = enableRetry ? maxRetryAttempts : 1;
+    
+    while (attempts < maxAttempts && !_isCancelled) {
+      attempts++;
+      
+      try {
+        if (attempts > 1 && retryStatus != null) {
+          retryStatus(attempts, maxAttempts);
+        }
+
+        await _attemptSingleStream(
+          streamIndex: streamIndex,
+          host: host,
+          port: port,
+          sizeMB: sizeMB,
+          onProgress: onProgress,
+        );
+        return; // Success
+      } catch (e) {
+        if (attempts >= maxAttempts || _isCancelled) {
+          rethrow;
+        }
+        
+        // Wait before retry
+        double delay = retryDelaySeconds + (attempts * retryDelayIncrement);
+        if (delay > 10) delay = 10;
+        await Future.delayed(Duration(milliseconds: (delay * 1000).toInt()));
+      }
+    }
+  }
+
+  Future<void> _attemptSingleStream({
+    required int streamIndex,
+    required String host,
+    required int port,
+    required int sizeMB,
+    required Function(int) onProgress,
+  }) async {
     if (_isCancelled) return;
 
-    try {
-      final socket = await Socket.connect(host, port, timeout: const Duration(seconds: 5));
-      socket.setOption(SocketOption.tcpNoDelay, true);
-      _clientSockets.add(socket);
+    final socket = await Socket.connect(host, port, timeout: const Duration(seconds: 5));
+    socket.setOption(SocketOption.tcpNoDelay, true);
+    _clientSockets.add(socket);
 
+    try {
       await _sendDataStream(
         socket: socket,
         totalSizeMB: sizeMB,
         progress: onProgress,
       );
     } catch (e) {
-      // Logic for retry could go here, but for simplicity in multi-stream:
-      // We just re-throw or handle quietly.
-      if (enableRetry && !_isCancelled) {
-         // Simple retry loop for this stream?
-         // This is a simplified version.
-         rethrow; 
-      }
+      socket.destroy();
+      _clientSockets.remove(socket);
       rethrow;
     }
   }
