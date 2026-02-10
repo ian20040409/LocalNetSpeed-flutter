@@ -26,3 +26,4 @@ TestResults.xml
 /.dart_tool
 /build
 /.idea
+android/key.properties
