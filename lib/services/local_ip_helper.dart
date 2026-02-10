@@ -1,8 +1,12 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
 class LocalIPHelper {
   static Future<String> getLocalIPAddress() async {
+    if (kIsWeb) {
+      return "Web Not Supported";
+    }
     try {
       // Try network_info_plus first for WiFi IP (most common use case)
       final info = NetworkInfo();

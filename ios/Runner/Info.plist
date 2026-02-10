@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>LocalNetSpeed need access to your local network to connect to other devices for speed testing.</string>
 </dict>
 </plist>
