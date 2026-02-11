@@ -65,6 +65,7 @@ flutter_launcher_icons:
 
 msix_config:
   icon_path: assets/android_app_icon_for_others/android/play_store_512.png
+  logo_path: assets/android_app_icon_for_others/android/play_store_512.png
 
 # For information on the generic Dart part of this file, see the
   # encourage good coding practices. The lint set provided by the package is
