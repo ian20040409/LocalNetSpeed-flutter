@@ -303,66 +303,69 @@ class _ContentViewState extends State<ContentView> {
                 ),
                 
                 // Bottom Actions
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        offset: const Offset(0, -2),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      if (vm.isRunning) ...[
-                        Expanded(
-                          child: FilledButton.icon(
-                            onPressed: () {
-                              vm.cancel();
-                              HapticFeedback.lightImpact();
-                            },
-                            icon: const Icon(Icons.stop_circle),
-                            label: const Text("停止"),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              minimumSize: const Size(0, 50),
-                            ),
-                          ),
+                SafeArea(
+                  top: false,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          offset: const Offset(0, -2),
+                          blurRadius: 10,
                         ),
-                        if (vm.mode == SpeedTestMode.server) ...[
-                          const SizedBox(width: 12),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        if (vm.isRunning) ...[
                           Expanded(
                             child: FilledButton.icon(
                               onPressed: () {
-                                vm.forceStopServer();
+                                vm.cancel();
+                                HapticFeedback.lightImpact();
                               },
-                              icon: const Icon(Icons.dangerous),
-                              label: const Text("強制停止"),
+                              icon: const Icon(Icons.stop_circle),
+                              label: const Text("停止"),
                               style: FilledButton.styleFrom(
-                                backgroundColor: Colors.orange,
+                                backgroundColor: Colors.red,
                                 minimumSize: const Size(0, 50),
                               ),
                             ),
                           ),
-                        ],
-                      ] else
-                        Expanded(
-                          child: FilledButton.icon(
-                            onPressed: () {
-                              vm.start();
-                              HapticFeedback.mediumImpact();
-                            },
-                            icon: Icon(vm.mode == SpeedTestMode.server ? Icons.play_circle : Icons.bolt),
-                            label: Text(vm.mode == SpeedTestMode.server ? "啟動伺服器" : "開始測試"),
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(0, 50),
+                          if (vm.mode == SpeedTestMode.server) ...[
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: () {
+                                  vm.forceStopServer();
+                                },
+                                icon: const Icon(Icons.dangerous),
+                                label: const Text("強制停止"),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  minimumSize: const Size(0, 50),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ] else
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: () {
+                                vm.start();
+                                HapticFeedback.mediumImpact();
+                              },
+                              icon: Icon(vm.mode == SpeedTestMode.server ? Icons.play_circle : Icons.bolt),
+                              label: Text(vm.mode == SpeedTestMode.server ? "啟動伺服器" : "開始測試"),
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size(0, 50),
+                              ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],

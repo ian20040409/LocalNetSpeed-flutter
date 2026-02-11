@@ -19,26 +19,28 @@ class LogView extends StatelessWidget {
           )
         ],
       ),
-      body: Consumer<ContentViewModel>(
-        builder: (context, vm, child) {
-          return Container(
-            padding: const EdgeInsets.all(16),
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.black87,
-            child: SingleChildScrollView(
-              reverse: true, // Auto scroll to bottom
-              child: Text(
-                vm.log.isEmpty ? "尚無日誌" : vm.log,
-                style: const TextStyle(
-                  color: Colors.greenAccent,
-                  fontFamily: 'Courier',
-                  fontSize: 12,
+      body: SafeArea(
+        child: Consumer<ContentViewModel>(
+          builder: (context, vm, child) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.black87,
+              child: SingleChildScrollView(
+                reverse: true, // Auto scroll to bottom
+                child: Text(
+                  vm.log.isEmpty ? "尚無日誌" : vm.log,
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                    fontFamily: 'Courier',
+                    fontSize: 12,
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
