@@ -27,3 +27,4 @@ TestResults.xml
 /build
 /.idea
 android/key.properties
+.flutter-plugins-dependencies
