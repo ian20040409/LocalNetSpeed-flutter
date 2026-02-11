@@ -45,6 +45,7 @@ dev_dependencies:
 
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^6.0.0
+  msix: ^3.16.13
 
 flutter_launcher_icons:
   android: true
@@ -61,6 +62,9 @@ flutter_launcher_icons:
   linux:
     generate: true
     image_path: "assets/android_app_icon_for_others/android/play_store_512.png"
+
+msix_config:
+  icon_path: assets/android_app_icon_for_others/android/play_store_512.png
 
 # For information on the generic Dart part of this file, see the
   # encourage good coding practices. The lint set provided by the package is
