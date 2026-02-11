@@ -48,17 +48,19 @@ dev_dependencies:
 
 flutter_launcher_icons:
   android: true
-  image_path_android: "assets/android_icon.png"
+  image_path_android: "assets/android_app_icon_for_others/android/play_store_512.png"
   ios: true
+  image_path_ios: "assets/app_icon.png"
   macos:
     generate: true
     image_path: "assets/app_icon.png"
   windows:
     generate: true
-    image_path: "assets/app_icon.png"
+    image_path: "assets/android_app_icon_for_others/android/play_store_512.png"
     icon_size: 256
-  linux: true
-  image_path: "assets/app_icon.png"
+  linux:
+    generate: true
+    image_path: "assets/android_app_icon_for_others/android/play_store_512.png"
 
 # For information on the generic Dart part of this file, see the
   # encourage good coding practices. The lint set provided by the package is
