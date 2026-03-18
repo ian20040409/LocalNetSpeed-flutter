@@ -21,8 +21,10 @@ class SpeedTester {
   DateTime? _serverTestStartTime;
   int _activeConnections = 0; // Track active streams for session management
   
-  // Speed Sampling for Ookla Algorithm
+  // Speed Sampling for LAN Algorithm
   final List<double> _speedSamples = [];
+  final List<int> _sampleTimestampsMs = []; // ms from test start
+  DateTime? _testStartTime; // shared start time for both server and client
   int _lastSampleBytes = 0;
   DateTime? _lastSampleTime;
 
@@ -55,7 +57,9 @@ class SpeedTester {
   void _resetServerSession() {
     _serverTotalReceivedBytes = 0;
     _serverTestStartTime = null;
+    _testStartTime = null;
     _speedSamples.clear();
+    _sampleTimestampsMs.clear();
     _lastSampleBytes = 0;
     _lastSampleTime = DateTime.now();
   }
@@ -96,6 +100,7 @@ class SpeedTester {
       if (_activeConnections == 0) {
         _resetServerSession();
         _serverTestStartTime = DateTime.now();
+        _testStartTime = _serverTestStartTime;
         _lastSampleTime = _serverTestStartTime;
       }
       _activeConnections++;
@@ -190,17 +195,17 @@ class SpeedTester {
                 _isCancelled = false;
                 _clientSockets.clear();
                 _speedSamples.clear();
+                _sampleTimestampsMs.clear();
                 _lastSampleBytes = 0;
-                _lastSampleTime = DateTime.now();
-            
                 // Divide total size among streams
                 int sizePerStream = (totalSizeMB / concurrency).ceil();
                 if (sizePerStream < 1) sizePerStream = 1;
-            
+
                 List<Future<void>> futures = [];
                 // Shared progress tracking
                 List<int> streamProgress = List.filled(concurrency, 0);
                 DateTime startTime = DateTime.now();
+                _testStartTime = startTime;
                 _lastSampleTime = startTime;
             
                 for (int i = 0; i < concurrency; i++) {
@@ -214,11 +219,7 @@ class SpeedTester {
                        streamProgress[streamIndex] = bytes;
                        int total = streamProgress.reduce((a, b) => a + b);
                        progress(total);
-                       
-                       DateTime now = DateTime.now();
-                       if (_lastSampleTime != null && now.difference(_lastSampleTime!).inMilliseconds > 100) {
-                          _addSample(total, now);
-                       }
+                       _addSample(total, DateTime.now());
                      },
                      enableRetry: enableRetry,
                      retryStatus: retryStatus,
@@ -265,67 +266,95 @@ class SpeedTester {
                   _lastSampleBytes = currentBytes;
                   return;
                 }
-            
+
                 int diffMicros = now.difference(_lastSampleTime!).inMicroseconds;
-                if (diffMicros > 0) {
-                  int diffBytes = currentBytes - _lastSampleBytes;
-                  // Calculate MB/s
-                  double speed = (diffBytes / 1024 / 1024) / (diffMicros / 1000000.0);
-                  
-                  // Filter unrealistic spikes (e.g., > 10 Gbps) caused by buffering
-                  if (speed > 0 && speed < 10000) { 
-                     _speedSamples.add(speed);
-                  }
-                  
-                  _lastSampleBytes = currentBytes;
+                // Enforce minimum 50ms between samples to reduce noise
+                if (diffMicros < 50000) return;
+
+                int diffBytes = currentBytes - _lastSampleBytes;
+                // Guard against negative or zero diffs (e.g., resets)
+                if (diffBytes <= 0) {
                   _lastSampleTime = now;
+                  return;
                 }
+
+                double speed = (diffBytes / 1024 / 1024) / (diffMicros / 1000000.0);
+
+                // Filter unrealistic spikes (> 10 Gbps) caused by OS buffering
+                if (speed > 0 && speed < 10000) {
+                  _speedSamples.add(speed);
+                  // Record ms offset from test start for time-based warmup
+                  int msOffset = _testStartTime != null
+                      ? now.difference(_testStartTime!).inMilliseconds
+                      : 0;
+                  _sampleTimestampsMs.add(msOffset);
+                }
+
+                _lastSampleBytes = currentBytes;
+                _lastSampleTime = now;
               }
-            
+
               double _calculateSmartSpeed() {
                 if (_speedSamples.isEmpty) return 0.0;
-            
+
                 int total = _speedSamples.length;
-                // If not enough samples, use simple average
-                if (total < 10) {
-                   return _speedSamples.reduce((a, b) => a + b) / total;
-                }
-            
-                // 1. Sequential Warm-up (Time-Domain Filter)
-                // Ignore the first 20% of samples to filter out TCP Slow Start
-                int warmupCount = (total * 0.2).ceil();
-                List<double> steadyStateSamples = _speedSamples.sublist(warmupCount);
-            
-                if (steadyStateSamples.isEmpty) {
+                if (total < 5) {
                   return _speedSamples.reduce((a, b) => a + b) / total;
                 }
-            
-                // 2. Outlier Filter (Value-Domain Filter)
-                // Sort the steady state samples to identify spikes and noise
-                steadyStateSamples.sort((a, b) => b.compareTo(a)); // Descending
-            
-                int steadyTotal = steadyStateSamples.length;
-                // Discard Top 10% (OS Buffering Spikes)
-                int trimTop = (steadyTotal * 0.1).ceil();
-                // Discard Bottom 5% (Minor Noise/Jitter)
-                int trimBottom = (steadyTotal * 0.05).ceil();
-            
-                int start = trimTop;
-                int end = steadyTotal - trimBottom;
-            
-                if (start >= end) {
-                   return steadyStateSamples.reduce((a, b) => a + b) / steadyTotal;
+
+                // 1. Warmup filter: discard TCP Slow Start phase
+                // Use time-based warmup (first 1s) when test duration > 2s,
+                // otherwise fall back to count-based warmup (first 20%).
+                List<double> steadySamples;
+                int testDurationMs = _sampleTimestampsMs.isNotEmpty
+                    ? _sampleTimestampsMs.last
+                    : 0;
+
+                if (testDurationMs > 2000 && _sampleTimestampsMs.length == _speedSamples.length) {
+                  steadySamples = [
+                    for (int i = 0; i < _speedSamples.length; i++)
+                      if (_sampleTimestampsMs[i] >= 1000) _speedSamples[i]
+                  ];
+                } else {
+                  int warmupCount = (total * 0.2).ceil();
+                  steadySamples = _speedSamples.sublist(warmupCount);
                 }
-            
-                // 3. Average the remaining core samples
-                double sum = 0;
-                int count = 0;
-                for (int i = start; i < end; i++) {
-                  sum += steadyStateSamples[i];
-                  count++;
+
+                if (steadySamples.length < 3) {
+                  return _speedSamples.reduce((a, b) => a + b) / total;
                 }
-            
-                return count > 0 ? sum / count : 0.0;
+
+                // 2. IQR-based outlier removal (more robust than fixed percentile trimming)
+                // Adapts to the actual data distribution rather than assuming fixed ratios.
+                List<double> sorted = List.from(steadySamples)..sort();
+                double q1 = _percentile(sorted, 0.25);
+                double q3 = _percentile(sorted, 0.75);
+                double iqr = q3 - q1;
+
+                List<double> filtered;
+                if (iqr > 0) {
+                  double lower = q1 - 1.5 * iqr;
+                  double upper = q3 + 1.5 * iqr;
+                  filtered = steadySamples.where((s) => s >= lower && s <= upper).toList();
+                } else {
+                  // IQR == 0 means very stable network; all samples are essentially identical
+                  filtered = steadySamples;
+                }
+
+                if (filtered.isEmpty) filtered = steadySamples;
+
+                // 3. Mean of the filtered steady-state samples
+                return filtered.reduce((a, b) => a + b) / filtered.length;
+              }
+
+              /// Linear interpolation percentile on a sorted list.
+              double _percentile(List<double> sorted, double p) {
+                if (sorted.isEmpty) return 0;
+                double idx = p * (sorted.length - 1);
+                int lower = idx.floor();
+                int upper = idx.ceil();
+                if (lower == upper) return sorted[lower];
+                return sorted[lower] + (sorted[upper] - sorted[lower]) * (idx - lower);
               }
   Future<void> _attemptStreamWithRetry({
     required int streamIndex,
