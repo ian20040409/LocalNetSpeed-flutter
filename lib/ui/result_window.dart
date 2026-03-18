@@ -67,6 +67,15 @@ class ResultWindow extends StatelessWidget {
                       "耗時",
                       "${result.duration.toStringAsFixed(2)} 秒",
                     ),
+                    if (result.p90SpeedMBps != null) ...[
+                      Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
+                      _buildStatBadge(
+                        context,
+                        Icons.speed,
+                        "P90",
+                        "${unit.convertFromMBps(result.p90SpeedMBps!).toStringAsFixed(1)} ${unit.label}",
+                      ),
+                    ],
                   ],
                 ),
               ),

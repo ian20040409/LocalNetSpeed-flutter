@@ -35,7 +35,7 @@ class ContentViewModel extends ChangeNotifier {
 
   String _localIP = "獲取中...";
   String get localIP => _localIP;
-  
+
   Future<void> fetchLocalIP() async {
     _localIP = "獲取中...";
     notifyListeners();
@@ -68,6 +68,21 @@ class ContentViewModel extends ChangeNotifier {
   String get sizeMB => _sizeMB;
   set sizeMB(String v) {
     _sizeMB = v;
+    notifyListeners();
+  }
+
+  // Time-bounded mode
+  bool _useTimeBounded = false;
+  bool get useTimeBounded => _useTimeBounded;
+  set useTimeBounded(bool v) {
+    _useTimeBounded = v;
+    notifyListeners();
+  }
+
+  String _durationSeconds = "10";
+  String get durationSeconds => _durationSeconds;
+  set durationSeconds(String v) {
+    _durationSeconds = v;
     notifyListeners();
   }
 
@@ -139,44 +154,89 @@ class ContentViewModel extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      int? size = int.tryParse(_sizeMB);
-      if (size == null || size <= 0) {
-        _progressText = "資料大小不正確";
-        _isRunning = false;
-        notifyListeners();
-        return;
-      }
 
-      _appendLog("客戶端連線到 $_host:$p，傳送 $size MB (4 平行串流)...");
-      _tester!.runClient(
-        host: _host,
-        port: p,
-        totalSizeMB: size,
-        concurrency: 4,
-        progress: (sent) {
-          double percent = sent / (size * 1024 * 1024) * 100;
-          _progressText = "進度 ${percent.toStringAsFixed(1)}%";
+      if (_useTimeBounded) {
+        // Time-bounded mode
+        int? dur = int.tryParse(_durationSeconds);
+        if (dur == null || dur <= 0) {
+          _progressText = "測試時間不正確";
+          _isRunning = false;
           notifyListeners();
-        },
-        completion: (res) {
-          _handleCompletion(res);
-        },
-        retryStatus: (attempt, maxAttempts) {
-          if (attempt == 1) {
-            _progressText = "正在連線...";
-          } else if (attempt <= 5) {
-            _progressText = "重試連線 ($attempt/$maxAttempts)...";
-            _appendLog("第 $attempt 次連線嘗試...");
-          } else {
-            _progressText = "等待伺服器啟動... ($attempt/$maxAttempts)";
-            if (attempt % 5 == 0) {
-              _appendLog("持續等待伺服器啟動... (第 $attempt 次嘗試)");
+          return;
+        }
+
+        _appendLog("客戶端連線到 $_host:$p，時間導向測試 ${dur}s (4 平行串流)...");
+        _tester!.runClient(
+          host: _host,
+          port: p,
+          totalSizeMB: 10000, // Large ceiling; actual limit is deadline
+          durationSeconds: dur,
+          concurrency: 4,
+          progress: (sent) {
+            double mb = sent / 1024 / 1024;
+            _progressText = "已傳送 ${mb.toStringAsFixed(1)} MB";
+            notifyListeners();
+          },
+          completion: (res) {
+            _handleCompletion(res);
+          },
+          retryStatus: (attempt, maxAttempts) {
+            if (attempt == 1) {
+              _progressText = "正在連線...";
+            } else if (attempt <= 5) {
+              _progressText = "重試連線 ($attempt/$maxAttempts)...";
+              _appendLog("第 $attempt 次連線嘗試...");
+            } else {
+              _progressText = "等待伺服器啟動... ($attempt/$maxAttempts)";
+              if (attempt % 5 == 0) {
+                _appendLog("持續等待伺服器啟動... (第 $attempt 次嘗試)");
+              }
             }
-          }
+            notifyListeners();
+          },
+          enableRetry: _enableRetry,
+        );
+      } else {
+        // Size-bounded mode
+        int? size = int.tryParse(_sizeMB);
+        if (size == null || size <= 0) {
+          _progressText = "資料大小不正確";
+          _isRunning = false;
           notifyListeners();
-        },
-        enableRetry: _enableRetry,
-      );
+          return;
+        }
+
+        _appendLog("客戶端連線到 $_host:$p，傳送 $size MB (4 平行串流)...");
+        _tester!.runClient(
+          host: _host,
+          port: p,
+          totalSizeMB: size,
+          concurrency: 4,
+          progress: (sent) {
+            double percent = sent / (size * 1024 * 1024) * 100;
+            _progressText = "進度 ${percent.toStringAsFixed(1)}%";
+            notifyListeners();
+          },
+          completion: (res) {
+            _handleCompletion(res);
+          },
+          retryStatus: (attempt, maxAttempts) {
+            if (attempt == 1) {
+              _progressText = "正在連線...";
+            } else if (attempt <= 5) {
+              _progressText = "重試連線 ($attempt/$maxAttempts)...";
+              _appendLog("第 $attempt 次連線嘗試...");
+            } else {
+              _progressText = "等待伺服器啟動... ($attempt/$maxAttempts)";
+              if (attempt % 5 == 0) {
+                _appendLog("持續等待伺服器啟動... (第 $attempt 次嘗試)");
+              }
+            }
+            notifyListeners();
+          },
+          enableRetry: _enableRetry,
+        );
+      }
     }
   }
 
@@ -205,8 +265,8 @@ class ContentViewModel extends ChangeNotifier {
   void _handleCompletion(Result<SpeedTestResult> res) {
     if (res.isSuccess) {
       _result = res.value;
-      HapticFeedback.mediumImpact(); // Flutter doesn't have explicit 'success' haptic in standard, medium is close
-      
+      HapticFeedback.mediumImpact();
+
       if (_mode == SpeedTestMode.server) {
         _progressText = "等待連線...";
         _appendLog(_formatResult(_result!));
@@ -217,7 +277,7 @@ class ContentViewModel extends ChangeNotifier {
         _appendLog(_formatResult(_result!));
       }
     } else {
-      HapticFeedback.vibrate(); // Error haptic
+      HapticFeedback.vibrate();
       if (_mode == SpeedTestMode.server) {
         _progressText = "等待連線...";
         _appendLog("錯誤：${res.error}");
@@ -254,7 +314,7 @@ class ContentViewModel extends ChangeNotifier {
     final eval = r.evaluation;
     final totalMB = (r.transferredBytes / 1024 / 1024).toStringAsFixed(2);
     final durationStr = r.duration.toStringAsFixed(2);
-    
+
     final val = _selectedUnit.convertFromMBps(r.speedMBps);
     final speedStr = val.toStringAsFixed(2);
     final unitStr = _selectedUnit.label;
@@ -271,7 +331,15 @@ class ContentViewModel extends ChangeNotifier {
     buffer.writeln("--- 測試結果 ---");
     buffer.writeln("總量: $totalMB MB");
     buffer.writeln("耗時: $durationStr 秒");
-    buffer.writeln("平均: $speedStr $unitStr");
+    buffer.writeln("速度: $speedStr $unitStr");
+    if (r.p50SpeedMBps != null) {
+      final p50Val = _selectedUnit.convertFromMBps(r.p50SpeedMBps!);
+      buffer.writeln("P50 (中位數持續): ${p50Val.toStringAsFixed(2)} $unitStr");
+    }
+    if (r.p90SpeedMBps != null) {
+      final p90Val = _selectedUnit.convertFromMBps(r.p90SpeedMBps!);
+      buffer.writeln("P90 (峰值持續): ${p90Val.toStringAsFixed(2)} $unitStr");
+    }
     buffer.writeln("");
     buffer.writeln("--- Gigabit 評估 ---");
     buffer.writeln("實際速度: $evalSpeed $unitStr");

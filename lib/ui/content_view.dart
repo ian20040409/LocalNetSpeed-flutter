@@ -17,6 +17,7 @@ class _ContentViewState extends State<ContentView> {
   late TextEditingController _hostController;
   late TextEditingController _portController;
   late TextEditingController _sizeController;
+  late TextEditingController _durationController;
   bool _isShowingResult = false;
 
   @override
@@ -26,6 +27,7 @@ class _ContentViewState extends State<ContentView> {
     _hostController = TextEditingController(text: vm.host);
     _portController = TextEditingController(text: vm.port);
     _sizeController = TextEditingController(text: vm.sizeMB);
+    _durationController = TextEditingController(text: vm.durationSeconds);
     
     // Listen for result changes
     vm.addListener(_checkResult);
@@ -70,6 +72,7 @@ class _ContentViewState extends State<ContentView> {
     _hostController.dispose();
     _portController.dispose();
     _sizeController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
 
@@ -201,6 +204,28 @@ class _ContentViewState extends State<ContentView> {
                             ],
                           ),
                           const SizedBox(height: 12),
+
+                          // Time-bounded mode toggle
+                          Row(
+                            children: [
+                              const Icon(Icons.timer_outlined, color: Colors.grey),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  "時間導向測試",
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ),
+                              Switch(
+                                value: vm.useTimeBounded,
+                                onChanged: vm.isRunning ? null : (v) {
+                                  vm.useTimeBounded = v;
+                                  HapticFeedback.selectionClick();
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
                         ],
 
                         Row(
@@ -222,20 +247,37 @@ class _ContentViewState extends State<ContentView> {
                             ),
                             const SizedBox(width: 16),
                             if (vm.mode == SpeedTestMode.client) ...[
-                              const Icon(Icons.description, color: Colors.grey),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: TextField(
-                                  controller: _sizeController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    labelText: "大小 (MB)",
-                                    border: OutlineInputBorder(),
-                                    isDense: true,
-                                  ),
-                                  onChanged: (v) => vm.sizeMB = v,
-                                ),
+                              Icon(
+                                vm.useTimeBounded ? Icons.hourglass_empty : Icons.description,
+                                color: Colors.grey,
                               ),
+                              const SizedBox(width: 10),
+                              if (vm.useTimeBounded)
+                                Expanded(
+                                  child: TextField(
+                                    controller: _durationController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      labelText: "時間 (秒)",
+                                      border: OutlineInputBorder(),
+                                      isDense: true,
+                                    ),
+                                    onChanged: (v) => vm.durationSeconds = v,
+                                  ),
+                                )
+                              else
+                                Expanded(
+                                  child: TextField(
+                                    controller: _sizeController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      labelText: "大小 (MB)",
+                                      border: OutlineInputBorder(),
+                                      isDense: true,
+                                    ),
+                                    onChanged: (v) => vm.sizeMB = v,
+                                  ),
+                                ),
                             ] else
                               const Spacer(),
                           ],
