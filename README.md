@@ -44,6 +44,19 @@ This application uses a **Sliding Window Sustained Throughput** algorithm design
 
 Sliding windows are less sensitive to event-loop jitter than per-callback delta rates, and the median (P50) is inherently robust to outliers without requiring an explicit filter.
 
+## CI / CD
+
+Two manually-triggered GitHub Actions workflows are provided under `.github/workflows/`:
+
+| Workflow | File | Description |
+|---|---|---|
+| **Build & Release** | `build-release.yml` | Builds APK (Android), IPA (iOS, no-codesign), `.zip` (macOS & Windows), `.tar.gz` (Linux), then creates a GitHub Release with all artefacts attached. The version tag is read from `pubspec.yaml` automatically, or you can override it at dispatch time. |
+| **Cleanup Old Runs** | `cleanup-runs.yml` | Deletes all workflow run history across every workflow, keeping only the N most recent runs per workflow (default 1). Configure N at dispatch time. |
+
+Both workflows are triggered via **Actions → Run workflow** and never run automatically.
+
+> **iOS note**: The iOS build uses `--no-codesign`. The resulting `.ipa` can be side-loaded but cannot be submitted to the App Store without a valid provisioning profile and certificate.
+
 ## Getting Started
 
 ### Prerequisites
