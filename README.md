@@ -7,24 +7,42 @@ A high-performance local network speed testing tool built with Flutter. This app
 ## Features
 
 - **Cross-Platform Support**: Measure speeds between Android, iOS, macOS, Windows, and Linux.
-- **Client/Server Modes**: 
+- **Client/Server Modes**:
   - **Server Mode**: Host a listener on your device to receive data.
   - **Client Mode**: Connect to a server IP to start the throughput test.
+- **Two Test Modes**:
+  - **Size-bounded**: Transfer a fixed amount of data (e.g. 100 MB).
+  - **Time-bounded**: Transfer continuously for a fixed duration (e.g. 10 seconds).
 - **Material You Support**: Dynamic color theming on Android 12+.
 - **Real-time Metrics**: Live speed gauge and progress tracking.
 - **Gigabit Evaluation**: Identifies if your network environment supports Gigabit speeds.
+- **P50 / P90 Statistics**: Reports median sustained speed (P50) and peak sustained speed (P90) for richer insight.
 
 ## Speed Calculation Algorithm
 
-This application utilizes a robust **Sequential Trimmed Mean** algorithm designed specifically for high-bandwidth local networks (LAN). This ensures accurate and stable results by effectively filtering out TCP slow-start phases and OS buffer spikes:
+This application uses a **Sliding Window Sustained Throughput** algorithm designed for high-bandwidth local networks (LAN). It measures true sustained throughput rather than a simple average.
 
-1.  **Sampling**: Instantaneous speed samples are collected periodically (every ~100ms) throughout the duration of the test.
-2.  **Sequential Warm-up (Time-Domain)**:
-    *   The first **20%** of samples are discarded to ignore the "TCP Slow Start" phase, ensuring the metric reflects the network's steady-state capacity rather than its ramp-up curve.
-3.  **Stability Trimming (Value-Domain)**:
-    *   **Top 10% Discarded**: Filters out "Buffer Bloat" spikes where OS buffering causes speed readings to briefly exceed physical link capacity.
-    *   **Bottom 5% Discarded**: Filters out minor system jitter and noise during the steady state.
-4.  **Averaging**: The final result is derived from the average of the remaining steady, clean samples.
+### How It Works
+
+1. **Checkpoints**: Every ~80 ms, the cumulative bytes transferred and the elapsed time are recorded as a checkpoint.
+2. **Sliding Windows**: After the test, a 500 ms sliding window is applied across all checkpoints. Each window computes the instantaneous speed for that 500 ms span.
+3. **Warmup Exclusion**: Windows whose right edge falls within the first **1500 ms** are discarded to exclude the TCP Slow Start phase.
+4. **Statistics**:
+   - **P50 (median)** — the reported headline speed; robust against occasional dips or bursts.
+   - **P90 (90th percentile)** — the peak sustained speed; reflects the best throughput the link can maintain.
+5. **Fallback**: If insufficient checkpoints are collected (very short tests), the algorithm falls back to the overall bytes-over-time average.
+
+### Why Sliding Windows?
+
+| | Old algorithm | New algorithm |
+|---|---|---|
+| Sampling | Instantaneous rate per callback | Cumulative bytes checkpoints |
+| Windowing | None | 500 ms overlapping windows |
+| Warmup | First 20% of samples (count-based) | First 1500 ms (time-based) |
+| Outlier handling | IQR filter | Natural — windows smooth bursts |
+| Output | Single average speed | P50 + P90 |
+
+Sliding windows are less sensitive to event-loop jitter than per-callback delta rates, and the median (P50) is inherently robust to outliers without requiring an explicit filter.
 
 ## Getting Started
 
@@ -51,8 +69,10 @@ This application utilizes a robust **Sequential Trimmed Mean** algorithm designe
 ## Usage
 
 1. **Start the Server**: On one device, select "Server" mode and click "Start Server". Note the displayed Local IP.
-2. **Start the Client**: On the second device, select "Client" mode, enter the Server's IP address, and click "Start Test".
-3. **View Results**: The app will display the average speed, latency, and a gigabit compatibility evaluation.
+2. **Start the Client**: On the second device, select "Client" mode, enter the Server's IP address, and configure the test:
+   - **Size-bounded** (default): Enter the data size in MB and click "Start Test".
+   - **Time-bounded**: Enable the "時間導向測試" toggle, enter the duration in seconds, and click "Start Test".
+3. **View Results**: The result dialog displays the P50 speed on the gauge, plus a P90 badge alongside total transferred data and duration. The log view shows full P50/P90 details and a Gigabit compatibility evaluation.
 
 ## Related Projects
 
