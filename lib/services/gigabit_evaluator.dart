@@ -5,12 +5,13 @@ class GigabitEvaluator {
   static const double gigabitTheoreticalMBps = 125.0;
   static const double gigabitPracticalThreshold = 100.0;
 
-  // WiFi 6 (802.11ax 80MHz 2x2) practical expectations
-  static const double wifiTheoreticalMBps = 150.0; // ~1200 Mbps theoretical
-  static const double wifiExcellentMBps = 87.5;    // ~700 Mbps
-  static const double wifiGoodMBps = 62.5;          // ~500 Mbps
-  static const double wifiAverageMBps = 37.5;       // ~300 Mbps
-  static const double wifiSlowMBps = 12.5;          // ~100 Mbps
+  // WiFi 6 (802.11ax) TCP throughput thresholds (calibrated to real-world LAN performance,
+  // not air speed — TCP throughput is always significantly lower than advertised air rate)
+  static const double wifiTheoreticalMBps = 150.0;  // ~1200 Mbps WiFi 6 theoretical
+  static const double wifiExcellentMBps = 75.0;     // ~600 Mbps — WiFi 6 excellent TCP
+  static const double wifiGoodMBps = 43.75;          // ~350 Mbps — WiFi 6 typical TCP
+  static const double wifiAverageMBps = 18.75;       // ~150 Mbps — WiFi 5 / congested WiFi 6
+  static const double wifiSlowMBps = 6.25;           // ~50 Mbps  — WiFi 4 / weak signal
 
   // Keep backward-compatible alias
   static double get theoreticalMBps => gigabitTheoreticalMBps;
@@ -93,19 +94,19 @@ class GigabitEvaluator {
     if (speedMBps >= wifiExcellentMBps) {
       rating = "優秀";
       icon = "📶";
-      message = "WiFi 6 效能卓越，已接近有線速度";
+      message = "WiFi 6 效能卓越，接近有線速度";
     } else if (speedMBps >= wifiGoodMBps) {
       rating = "良好";
       icon = "✅";
-      message = "WiFi 效能良好，符合 WiFi 6 預期表現";
+      message = "WiFi 6 效能良好，符合正常預期";
     } else if (speedMBps >= wifiAverageMBps) {
       rating = "一般";
       icon = "⚡";
-      message = "WiFi 速度一般，可能為 WiFi 5 等級或訊號受限";
+      message = "WiFi 速度中等，可能為 WiFi 5 或訊號受限";
     } else if (speedMBps >= wifiSlowMBps) {
       rating = "偏慢";
       icon = "⚠️";
-      message = "WiFi 速度偏慢，建議檢查路由器與裝置距離";
+      message = "WiFi 速度偏慢，建議靠近路由器或排除干擾";
     } else {
       rating = "很慢";
       icon = "🚫";

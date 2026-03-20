@@ -17,8 +17,9 @@ A high-performance local network speed testing tool built with Flutter. This app
 - **Real-time Metrics**: Live speed gauge and progress tracking.
 - **Dual Evaluation Modes** (auto-detected or manual):
   - **Gigabit 有線**: Evaluates against Gigabit Ethernet thresholds (theoretical 1000 Mbps / 125 MB/s).
-  - **WiFi 區網**: Evaluates against WiFi 6 (802.11ax) thresholds (theoretical 1200 Mbps / 150 MB/s), with WiFi-specific ratings and suggestions.
+  - **WiFi 區網**: Evaluates against real-world WiFi 6 TCP throughput thresholds (≥600 Mbps excellent, ≥350 Mbps good, ≥150 Mbps average), with WiFi-specific ratings and suggestions. Thresholds are calibrated to actual TCP performance, not advertised air speed.
   - The app auto-detects whether the device is on WiFi or wired and selects the appropriate mode. You can manually override at any time.
+  - The speed gauge scale adapts to the evaluation mode (1200 Mbps max for WiFi, 1000 Mbps for Gigabit wired).
 - **P50 / P90 Statistics**: Reports median sustained speed (P50) and peak sustained speed (P90) for richer insight.
 
 ## Speed Calculation Algorithm
