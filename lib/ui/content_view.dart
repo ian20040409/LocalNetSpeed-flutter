@@ -336,6 +336,12 @@ class _ContentViewState extends State<ContentView> {
                                 },
                                 child: const Text("自動"),
                               ),
+                            IconButton(
+                              icon: const Icon(Icons.info_outline, size: 20),
+                              color: Colors.grey,
+                              tooltip: "評分標準",
+                              onPressed: () => _showRatingStandards(context, vm.evaluationMode),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -470,6 +476,91 @@ class _ContentViewState extends State<ContentView> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  void _showRatingStandards(BuildContext context, EvaluationMode mode) {
+    final isWifi = mode == EvaluationMode.wifi;
+    final rows = isWifi
+        ? const [
+            ("優秀", "📶", "≥ 600 Mbps", "WiFi 6 卓越效能"),
+            ("良好", "✅", "≥ 350 Mbps", "WiFi 6 正常效能"),
+            ("一般", "⚡", "≥ 150 Mbps", "WiFi 5 或訊號受限"),
+            ("偏慢", "⚠️", "≥ 50 Mbps",  "訊號弱或距路由器遠"),
+            ("很慢", "🚫", "< 50 Mbps",  "WiFi 4 或訊號極弱"),
+          ]
+        : const [
+            ("優秀", "✅", "≥ 800 Mbps", "Gigabit 等級效能"),
+            ("良好", "⚡", "≥ 640 Mbps", "接近 Gigabit 效能"),
+            ("一般", "⚠️", "≥ 400 Mbps", "建議檢查網路設備"),
+            ("偏慢", "🐌", "≥ 80 Mbps",  "可能未使用 Gigabit 設備"),
+            ("很慢", "🚫", "< 80 Mbps",  "建議檢查網路連線"),
+          ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(isWifi ? Icons.wifi : Icons.cable, size: 20),
+            const SizedBox(width: 8),
+            Text("${mode.label} 評分標準"),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isWifi)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  "以實際 TCP 吞吐量為基準，非無線空口速率",
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            Table(
+              columnWidths: const {
+                0: IntrinsicColumnWidth(),
+                1: IntrinsicColumnWidth(),
+                2: FlexColumnWidth(),
+              },
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: rows.map((r) {
+                return TableRow(children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(r.$2, style: const TextStyle(fontSize: 16)),
+                        const SizedBox(width: 4),
+                        Text(r.$1, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                    child: Text(r.$3,
+                        style: const TextStyle(fontFamily: 'monospace', fontSize: 13)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Text(r.$4,
+                        style: Theme.of(ctx).textTheme.bodySmall),
+                  ),
+                ]);
+              }).toList(),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text("關閉"),
+          ),
+        ],
       ),
     );
   }

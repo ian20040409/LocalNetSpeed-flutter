@@ -22,6 +22,34 @@ A high-performance local network speed testing tool built with Flutter. This app
   - The speed gauge scale adapts to the evaluation mode (1200 Mbps max for WiFi, 1000 Mbps for Gigabit wired).
 - **P50 / P90 Statistics**: Reports median sustained speed (P50) and peak sustained speed (P90) for richer insight.
 
+## Speed Rating Standards
+
+### Gigabit 有線 (Wired Ethernet)
+
+Gauge scale: 0 – 1000 Mbps (theoretical max 1000 Mbps / 125 MB/s)
+
+| Rating | Threshold | Description |
+|--------|-----------|-------------|
+| 優秀 ✅ | ≥ 800 Mbps (100 MB/s) | Gigabit-grade performance |
+| 良好 ⚡ | ≥ 640 Mbps (80 MB/s) | Near Gigabit, minor headroom |
+| 一般 ⚠️ | ≥ 400 Mbps (50 MB/s) | Average; check equipment |
+| 偏慢 🐌 | ≥ 80 Mbps (10 MB/s) | Likely non-Gigabit device |
+| 很慢 🚫 | < 80 Mbps (10 MB/s) | Check connection health |
+
+### WiFi 區網 (WiFi LAN)
+
+Gauge scale: 0 – 1200 Mbps (WiFi 6 theoretical max ~1200 Mbps / 150 MB/s)
+
+Thresholds are calibrated to **real-world TCP throughput**, not advertised air speed. TCP throughput is always significantly lower than the WiFi air rate due to protocol overhead, retransmissions, and half-duplex effects.
+
+| Rating | Threshold | Description |
+|--------|-----------|-------------|
+| 優秀 📶 | ≥ 600 Mbps (75 MB/s) | WiFi 6 excellent TCP performance |
+| 良好 ✅ | ≥ 350 Mbps (43.75 MB/s) | WiFi 6 typical TCP performance |
+| 一般 ⚡ | ≥ 150 Mbps (18.75 MB/s) | WiFi 5 level or congested WiFi 6 |
+| 偏慢 ⚠️ | ≥ 50 Mbps (6.25 MB/s) | Weak signal or far from router |
+| 很慢 🚫 | < 50 Mbps (6.25 MB/s) | WiFi 4 or extremely weak signal |
+
 ## Speed Calculation Algorithm
 
 This application uses a **Sliding Window Sustained Throughput** algorithm designed for high-bandwidth local networks (LAN). It measures true sustained throughput rather than a simple average.
