@@ -44,10 +44,7 @@ class ResultWindow extends StatelessWidget {
                         ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    result.evaluation.icon,
-                    style: const TextStyle(fontSize: 24),
-                  ),
+                  _buildRatingIcon(result.evaluation.icon),
                 ],
               ),
               const SizedBox(height: 4),
@@ -72,32 +69,39 @@ class ResultWindow extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatBadge(
-                      context,
-                      Icons.swap_vert,
-                      l10n.resultTotal,
-                      "${(result.transferredBytes / 1024 / 1024).toStringAsFixed(1)} MB",
-                    ),
-                    Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
-                    _buildStatBadge(
-                      context,
-                      Icons.access_time,
-                      l10n.resultDuration,
-                      l10n.resultDurationValue(result.duration.toStringAsFixed(2)),
-                    ),
-                    if (result.p90SpeedMBps != null) ...[
-                      Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
-                      _buildStatBadge(
-                        context,
-                        Icons.speed,
-                        "P90",
-                        "${unit.convertFromMBps(result.p90SpeedMBps!).toStringAsFixed(1)} ${unit.label}",
+                child: IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatBadge(
+                          context,
+                          Icons.swap_vert,
+                          l10n.resultTotal,
+                          "${(result.transferredBytes / 1024 / 1024).toStringAsFixed(1)} MB",
+                        ),
                       ),
+                      Container(width: 1, color: Colors.grey.withOpacity(0.3)),
+                      Expanded(
+                        child: _buildStatBadge(
+                          context,
+                          Icons.access_time,
+                          l10n.resultDuration,
+                          l10n.resultDurationValue(result.duration.toStringAsFixed(2)),
+                        ),
+                      ),
+                      if (result.p90SpeedMBps != null) ...[
+                        Container(width: 1, color: Colors.grey.withOpacity(0.3)),
+                        Expanded(
+                          child: _buildStatBadge(
+                            context,
+                            Icons.speed,
+                            "P90",
+                            "${unit.convertFromMBps(result.p90SpeedMBps!).toStringAsFixed(1)} ${unit.label}",
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -113,17 +117,44 @@ class ResultWindow extends StatelessWidget {
   }
 
   Widget _buildStatBadge(BuildContext context, IconData icon, String label, String value) {
-    return Column(
-      children: [
-        Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(height: 4),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(height: 4),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              maxLines: 1,
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildRatingIcon(String emojiIcon) {
+    switch (emojiIcon) {
+      case "✅":
+        return const Icon(Icons.check_circle, color: Colors.green, size: 28);
+      case "⚡":
+        return const Icon(Icons.bolt, color: Colors.orange, size: 28);
+      case "⚠️":
+        return const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 28);
+      case "🐌":
+        return const Icon(Icons.slow_motion_video, color: Colors.deepOrange, size: 28);
+      case "🚫":
+        return const Icon(Icons.cancel, color: Colors.red, size: 28);
+      case "📶":
+        return const Icon(Icons.signal_wifi_4_bar, color: Colors.green, size: 28);
+      default:
+        return const Icon(Icons.help_outline, size: 28);
+    }
   }
 
   double _getMaxSpeed(SpeedUnit unit, EvaluationMode mode) {
