@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import '../models/gigabit_evaluation.dart';
 import '../models/speed_test_result.dart';
 import 'gigabit_evaluator.dart';
 
@@ -65,6 +66,7 @@ class SpeedTester {
     required Function(int) progress,
     required Function(Result<SpeedTestResult>) completion,
     Function(int)? onNewConnection,
+    EvaluationMode evaluationMode = EvaluationMode.gigabit,
   }) async {
     if (kIsWeb) {
       completion(Result.failure(Exception("Web platform does not support TCP Server Sockets.")));
@@ -137,7 +139,7 @@ class SpeedTester {
                 ? p50
                 : (_serverTotalReceivedBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
 
-            var eval = GigabitEvaluator.evaluate(speed);
+            var eval = GigabitEvaluator.evaluate(speed, mode: evaluationMode);
             var result = SpeedTestResult(
               transferredBytes: _serverTotalReceivedBytes,
               duration: duration,
@@ -172,6 +174,7 @@ class SpeedTester {
     Function(int, int)? retryStatus,
     bool enableRetry = true,
     int concurrency = 4,
+    EvaluationMode evaluationMode = EvaluationMode.gigabit,
   }) async {
     if (kIsWeb) {
       completion(Result.failure(Exception("Web platform does not support TCP Client Sockets.")));
@@ -229,7 +232,7 @@ class SpeedTester {
             ? p50
             : (totalBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
 
-        var eval = GigabitEvaluator.evaluate(speed);
+        var eval = GigabitEvaluator.evaluate(speed, mode: evaluationMode);
         var result = SpeedTestResult(
           transferredBytes: totalBytes,
           duration: duration,

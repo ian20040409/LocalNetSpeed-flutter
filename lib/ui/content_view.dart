@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../models/gigabit_evaluation.dart';
 import '../models/speed_test_mode.dart';
+import '../services/local_ip_helper.dart';
 import '../view_models/content_view_model.dart';
 import 'log_view.dart';
 import 'result_window.dart';
@@ -130,7 +132,14 @@ class _ContentViewState extends State<ContentView> {
                         _buildCard(
                           child: Row(
                             children: [
-                              const Icon(Icons.network_wifi, color: Colors.blue),
+                              Icon(
+                                vm.detectedConnectionType == ConnectionType.wifi
+                                    ? Icons.wifi
+                                    : vm.detectedConnectionType == ConnectionType.wired
+                                        ? Icons.cable
+                                        : Icons.network_wifi,
+                                color: Colors.blue,
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
@@ -298,6 +307,53 @@ class _ContentViewState extends State<ContentView> {
                             HapticFeedback.selectionClick();
                           },
                           showSelectedIcon: false,
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Evaluation Mode
+                        Row(
+                          children: [
+                            Icon(
+                              vm.evaluationMode == EvaluationMode.wifi
+                                  ? Icons.wifi
+                                  : Icons.cable,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                vm.autoEvaluationMode
+                                    ? "評估模式：${vm.evaluationMode.label}（自動）"
+                                    : "評估模式：${vm.evaluationMode.label}",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                            if (!vm.autoEvaluationMode)
+                              TextButton(
+                                onPressed: vm.isRunning ? null : () {
+                                  vm.autoEvaluationMode = true;
+                                  HapticFeedback.selectionClick();
+                                },
+                                child: const Text("自動"),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        SegmentedButton<EvaluationMode>(
+                          segments: EvaluationMode.values.map((m) {
+                            return ButtonSegment<EvaluationMode>(
+                              value: m,
+                              label: Text(m.label),
+                              icon: Icon(m == EvaluationMode.gigabit
+                                  ? Icons.cable
+                                  : Icons.wifi),
+                            );
+                          }).toList(),
+                          selected: {vm.evaluationMode},
+                          onSelectionChanged: vm.isRunning ? null : (newSelection) {
+                            vm.evaluationMode = newSelection.first;
+                            HapticFeedback.selectionClick();
+                          },
                         ),
                         const SizedBox(height: 16),
 
