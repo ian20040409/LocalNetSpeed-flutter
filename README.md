@@ -15,7 +15,10 @@ A high-performance local network speed testing tool built with Flutter. This app
   - **Time-bounded**: Transfer continuously for a fixed duration (e.g. 10 seconds).
 - **Material You Support**: Dynamic color theming on Android 12+.
 - **Real-time Metrics**: Live speed gauge and progress tracking.
-- **Gigabit Evaluation**: Identifies if your network environment supports Gigabit speeds.
+- **Dual Evaluation Modes** (auto-detected or manual):
+  - **Gigabit 有線**: Evaluates against Gigabit Ethernet thresholds (theoretical 1000 Mbps / 125 MB/s).
+  - **WiFi 區網**: Evaluates against WiFi 6 (802.11ax) thresholds (theoretical 1200 Mbps / 150 MB/s), with WiFi-specific ratings and suggestions.
+  - The app auto-detects whether the device is on WiFi or wired and selects the appropriate mode. You can manually override at any time.
 - **P50 / P90 Statistics**: Reports median sustained speed (P50) and peak sustained speed (P90) for richer insight.
 
 ## Speed Calculation Algorithm
@@ -85,7 +88,8 @@ Both workflows are triggered via **Actions → Run workflow** and never run auto
 2. **Start the Client**: On the second device, select "Client" mode, enter the Server's IP address, and configure the test:
    - **Size-bounded** (default): Enter the data size in MB and click "Start Test".
    - **Time-bounded**: Enable the "時間導向測試" toggle, enter the duration in seconds, and click "Start Test".
-3. **View Results**: The result dialog displays the P50 speed on the gauge, plus a P90 badge alongside total transferred data and duration. The log view shows full P50/P90 details and a Gigabit compatibility evaluation.
+3. **Evaluation Mode**: The app auto-detects WiFi vs wired connections and selects the appropriate evaluation mode. You can manually switch between "Gigabit 有線" and "WiFi 區網", or tap "自動" to re-enable auto-detection.
+4. **View Results**: The result dialog displays the P50 speed on the gauge, plus a P90 badge alongside total transferred data and duration. The log view shows full P50/P90 details and evaluation based on the selected mode.
 
 ## Related Projects
 

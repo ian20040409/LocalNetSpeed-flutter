@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../models/gigabit_evaluation.dart';
 import '../models/speed_test_mode.dart';
 import '../models/speed_test_result.dart';
 import '../services/gigabit_evaluator.dart';
@@ -36,11 +37,40 @@ class ContentViewModel extends ChangeNotifier {
   String _localIP = "獲取中...";
   String get localIP => _localIP;
 
+  ConnectionType _detectedConnectionType = ConnectionType.unknown;
+  ConnectionType get detectedConnectionType => _detectedConnectionType;
+
+  bool _autoEvaluationMode = true;
+  bool get autoEvaluationMode => _autoEvaluationMode;
+  set autoEvaluationMode(bool v) {
+    _autoEvaluationMode = v;
+    if (v) {
+      _applyAutoEvaluationMode();
+    }
+    notifyListeners();
+  }
+
   Future<void> fetchLocalIP() async {
     _localIP = "獲取中...";
     notifyListeners();
-    _localIP = await LocalIPHelper.getLocalIPAddress();
+    final result = await LocalIPHelper.detectNetwork();
+    _localIP = result.ip;
+    _detectedConnectionType = result.connectionType;
+    if (_autoEvaluationMode) {
+      _applyAutoEvaluationMode();
+    }
     notifyListeners();
+  }
+
+  void _applyAutoEvaluationMode() {
+    switch (_detectedConnectionType) {
+      case ConnectionType.wifi:
+        _evaluationMode = EvaluationMode.wifi;
+      case ConnectionType.wired:
+        _evaluationMode = EvaluationMode.gigabit;
+      case ConnectionType.unknown:
+        _evaluationMode = EvaluationMode.gigabit;
+    }
   }
 
   SpeedUnit _selectedUnit = SpeedUnit.mbps;
@@ -101,6 +131,14 @@ class ContentViewModel extends ChangeNotifier {
   int _serverConnectionCount = 0;
   int get serverConnectionCount => _serverConnectionCount;
 
+  EvaluationMode _evaluationMode = EvaluationMode.gigabit;
+  EvaluationMode get evaluationMode => _evaluationMode;
+  set evaluationMode(EvaluationMode v) {
+    _evaluationMode = v;
+    _autoEvaluationMode = false; // Manual override disables auto
+    notifyListeners();
+  }
+
   bool _enableRetry = true;
   bool get enableRetry => _enableRetry;
   set enableRetry(bool v) {
@@ -133,6 +171,7 @@ class ContentViewModel extends ChangeNotifier {
       _appendLog("伺服器啟動，埠 $p，等待連線...");
       _tester!.runServer(
         port: p,
+        evaluationMode: _evaluationMode,
         progress: (bytes) {
           double mb = bytes / 1024 / 1024;
           _progressText = "已接收 ${mb.toStringAsFixed(1)} MB";
@@ -195,6 +234,7 @@ class ContentViewModel extends ChangeNotifier {
             notifyListeners();
           },
           enableRetry: _enableRetry,
+          evaluationMode: _evaluationMode,
         );
       } else {
         // Size-bounded mode
@@ -235,6 +275,7 @@ class ContentViewModel extends ChangeNotifier {
             notifyListeners();
           },
           enableRetry: _enableRetry,
+          evaluationMode: _evaluationMode,
         );
       }
     }
@@ -322,7 +363,7 @@ class ContentViewModel extends ChangeNotifier {
     final evalSpeedVal = _selectedUnit.convertFromMBps(eval.speedMBps);
     final evalSpeed = evalSpeedVal.toStringAsFixed(2);
 
-    final theoreticalVal = _selectedUnit.convertFromMBps(GigabitEvaluator.theoreticalMBps);
+    final theoreticalVal = _selectedUnit.convertFromMBps(GigabitEvaluator.theoreticalForMode(eval.mode));
     final theoreticalStr = theoreticalVal.toStringAsFixed(0);
 
     final percentStr = eval.performancePercent.toStringAsFixed(1);
@@ -341,11 +382,11 @@ class ContentViewModel extends ChangeNotifier {
       buffer.writeln("P90 (峰值持續): ${p90Val.toStringAsFixed(2)} $unitStr");
     }
     buffer.writeln("");
-    buffer.writeln("--- Gigabit 評估 ---");
+    buffer.writeln("--- ${eval.mode.label} 評估 ---");
     buffer.writeln("實際速度: $evalSpeed $unitStr");
     buffer.writeln("理論: $theoreticalStr $unitStr");
     buffer.writeln("達成比例: $percentStr %");
-    buffer.writeln("評級: ${eval.rating}");
+    buffer.writeln("評級: ${eval.icon} ${eval.rating}");
     buffer.writeln("建議: ${eval.message}");
     if (eval.suggestions.isNotEmpty) {
       buffer.writeln("改善建議:");

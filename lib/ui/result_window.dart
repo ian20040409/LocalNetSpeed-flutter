@@ -30,10 +30,27 @@ class ResultWindow extends StatelessWidget {
                 maxSpeed: _getMaxSpeed(unit),
               ),
               const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    result.evaluation.rating,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    result.evaluation.icon,
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
               Text(
-                result.evaluation.rating,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                result.evaluation.mode.label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
                     ),
               ),
               const SizedBox(height: 8),
