@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/gigabit_evaluation.dart';
 import '../models/speed_test_result.dart';
 import '../view_models/content_view_model.dart';
 import 'speed_gauge_view.dart';
@@ -27,7 +28,7 @@ class ResultWindow extends StatelessWidget {
               SpeedGaugeView(
                 speed: unit.convertFromMBps(result.speedMBps),
                 unit: unit.label,
-                maxSpeed: _getMaxSpeed(unit),
+                maxSpeed: _getMaxSpeed(unit, result.evaluation.mode),
               ),
               const SizedBox(height: 24),
               Row(
@@ -122,7 +123,15 @@ class ResultWindow extends StatelessWidget {
     );
   }
 
-  double _getMaxSpeed(SpeedUnit unit) {
+  double _getMaxSpeed(SpeedUnit unit, EvaluationMode mode) {
+    if (mode == EvaluationMode.wifi) {
+      switch (unit) {
+        case SpeedUnit.mbps: return 1200;
+        case SpeedUnit.gbps: return 1.2;
+        case SpeedUnit.mbs: return 150;
+        case SpeedUnit.kbps: return 1200000;
+      }
+    }
     switch (unit) {
       case SpeedUnit.mbps: return 1000;
       case SpeedUnit.gbps: return 1;
