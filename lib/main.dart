@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'generated/l10n/app_localizations.dart';
 import 'ui/content_view.dart';
 import 'view_models/content_view_model.dart';
 
@@ -39,6 +41,16 @@ class LocalNetSpeedApp extends StatelessWidget {
           return MaterialApp(
             title: 'LocalNetSpeed',
             debugShowCheckedModeBanner: false,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en'),
+              Locale('zh', 'TW'),
+            ],
             theme: ThemeData(
               colorScheme: lightColorScheme,
               useMaterial3: true,

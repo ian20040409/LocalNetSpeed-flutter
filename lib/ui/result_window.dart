@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/gigabit_evaluation.dart';
+import '../models/gigabit_evaluation_l10n.dart';
 import '../models/speed_test_result.dart';
 import '../view_models/content_view_model.dart';
 import 'speed_gauge_view.dart';
@@ -16,6 +18,7 @@ class ResultWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
@@ -49,7 +52,7 @@ class ResultWindow extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                result.evaluation.mode.label,
+                result.evaluation.mode.localizedLabel(context),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -75,15 +78,15 @@ class ResultWindow extends StatelessWidget {
                     _buildStatBadge(
                       context,
                       Icons.swap_vert,
-                      "總量",
+                      l10n.resultTotal,
                       "${(result.transferredBytes / 1024 / 1024).toStringAsFixed(1)} MB",
                     ),
                     Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
                     _buildStatBadge(
                       context,
                       Icons.access_time,
-                      "耗時",
-                      "${result.duration.toStringAsFixed(2)} 秒",
+                      l10n.resultDuration,
+                      l10n.resultDurationValue(result.duration.toStringAsFixed(2)),
                     ),
                     if (result.p90SpeedMBps != null) ...[
                       Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
@@ -100,7 +103,7 @@ class ResultWindow extends StatelessWidget {
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text("關閉"),
+                child: Text(l10n.closeButton),
               ),
             ],
           ),

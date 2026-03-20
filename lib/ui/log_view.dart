@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../view_models/content_view_model.dart';
 
 class LogView extends StatelessWidget {
@@ -7,9 +8,10 @@ class LogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("日誌"),
+        title: Text(l10n.logScreenTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
@@ -28,9 +30,9 @@ class LogView extends StatelessWidget {
               height: double.infinity,
               color: Colors.black87,
               child: SingleChildScrollView(
-                reverse: true, // Auto scroll to bottom
+                reverse: true,
                 child: Text(
-                  vm.log.isEmpty ? "尚無日誌" : vm.log,
+                  vm.log.isEmpty ? l10n.logEmpty : vm.log,
                   style: const TextStyle(
                     color: Colors.greenAccent,
                     fontFamily: 'Courier',
