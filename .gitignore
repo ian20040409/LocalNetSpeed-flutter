@@ -28,3 +28,4 @@ TestResults.xml
 /.idea
 android/key.properties
 .flutter-plugins-dependencies
+.claude/worktrees/festive-kirch/
