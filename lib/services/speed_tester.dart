@@ -20,11 +20,11 @@ class SpeedTester {
   int _serverTotalReceivedBytes = 0;
   DateTime? _serverTestStartTime;
   int _activeConnections = 0; // Track active streams for session management
-  
-  // Speed Sampling for Ookla Algorithm
-  final List<double> _speedSamples = [];
-  int _lastSampleBytes = 0;
-  DateTime? _lastSampleTime;
+
+  // Sliding Window Algorithm state
+  // Each checkpoint: (milliseconds from test start, cumulative bytes)
+  final List<(int ms, int bytes)> _checkpoints = [];
+  DateTime? _testStartTime; // Shared start time for both server and client
 
   // Retry state
   Timer? _retryTimer;
@@ -34,20 +34,19 @@ class SpeedTester {
     _isCancelled = true;
     _retryTimer?.cancel();
     _connectionTimeoutTimer?.cancel();
-    
-    // Close sockets
+
     if (!kIsWeb) {
       try {
         _serverSocket?.close();
         _serverSocket = null;
       } catch (_) {}
-      
+
       for (var s in _clientSockets) {
         try { s.destroy(); } catch (_) {}
       }
       _clientSockets.clear();
     }
-    
+
     _resetServerSession();
     _activeConnections = 0;
   }
@@ -55,9 +54,8 @@ class SpeedTester {
   void _resetServerSession() {
     _serverTotalReceivedBytes = 0;
     _serverTestStartTime = null;
-    _speedSamples.clear();
-    _lastSampleBytes = 0;
-    _lastSampleTime = DateTime.now();
+    _testStartTime = null;
+    _checkpoints.clear();
   }
 
   // --- Server ---
@@ -96,7 +94,7 @@ class SpeedTester {
       if (_activeConnections == 0) {
         _resetServerSession();
         _serverTestStartTime = DateTime.now();
-        _lastSampleTime = _serverTestStartTime;
+        _testStartTime = _serverTestStartTime;
       }
       _activeConnections++;
 
@@ -104,8 +102,7 @@ class SpeedTester {
       if (onNewConnection != null) {
         onNewConnection(totalConnectionCounter);
       }
-      
-      // Optimization: Disable Nagle's algorithm for receiving socket too
+
       socket.setOption(SocketOption.tcpNoDelay, true);
 
       DateTime lastProgressTime = DateTime.now();
@@ -113,25 +110,17 @@ class SpeedTester {
       socket.listen(
         (List<int> data) {
           _serverTotalReceivedBytes += data.length;
-          
-          // Throttled UI updates for server side
+
           DateTime now = DateTime.now();
           if (now.difference(lastProgressTime).inMilliseconds > 100) {
             progress(_serverTotalReceivedBytes);
-            
-            // Collect Sample
-            _addSample(_serverTotalReceivedBytes, now);
-            
+            _addCheckpoint(_serverTotalReceivedBytes, now);
             lastProgressTime = now;
           }
         },
         onError: (error) {
           _activeConnections--;
           socket.destroy();
-           if (_activeConnections == 0) {
-             // If all streams failed or closed, we might want to signal something
-             // For now, we rely on the logic that at least one might succeed or the user cancels
-           }
         },
         onDone: () {
           _activeConnections--;
@@ -142,206 +131,196 @@ class SpeedTester {
             DateTime endTime = DateTime.now();
             DateTime start = _serverTestStartTime ?? endTime;
             double duration = endTime.difference(start).inMicroseconds / 1000000.0;
-            
-                      // Use Smart LAN algorithm for speed if possible, else fallback to avg
-                      double speed = _calculateSmartSpeed();
-                      if (speed == 0) {
-                         speed = (_serverTotalReceivedBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
-                      }
-                      
-                      var eval = GigabitEvaluator.evaluate(speed);
-                      var result = SpeedTestResult(
-                        transferredBytes: _serverTotalReceivedBytes,
-                        duration: duration,
-                        startedAt: start,
-                        endedAt: endTime,
-                        evaluation: eval,
-                      );
-                      
-                      completion(Result.success(result));
-                      }
-                    },
-                    cancelOnError: true,
-                  );
-                }, onError: (error) {
-                  if (!_isCancelled) {
-                    completion(Result.failure(error));
-                  }
-                });
-              }
-            
-              // --- Client ---
-            
-              Future<void> runClient({
-                required String host,
-                required int port,
-                required int totalSizeMB,
-                required Function(int) progress,
-                required Function(Result<SpeedTestResult>) completion,
-                Function(int, int)? retryStatus,
-                bool enableRetry = true,
-                int concurrency = 4, // Default to 4 parallel streams
-              }) async {
-                if (kIsWeb) {
-                  completion(Result.failure(Exception("Web platform does not support TCP Client Sockets.")));
-                  return;
-                }
-            
-                _isCancelled = false;
-                _clientSockets.clear();
-                _speedSamples.clear();
-                _lastSampleBytes = 0;
-                _lastSampleTime = DateTime.now();
-            
-                // Divide total size among streams
-                int sizePerStream = (totalSizeMB / concurrency).ceil();
-                if (sizePerStream < 1) sizePerStream = 1;
-            
-                List<Future<void>> futures = [];
-                // Shared progress tracking
-                List<int> streamProgress = List.filled(concurrency, 0);
-                DateTime startTime = DateTime.now();
-                _lastSampleTime = startTime;
-            
-                for (int i = 0; i < concurrency; i++) {
-                   int streamIndex = i;
-                   futures.add(_attemptStreamWithRetry(
-                     streamIndex: streamIndex,
-                     host: host,
-                     port: port,
-                     sizeMB: sizePerStream,
-                     onProgress: (bytes) {
-                       streamProgress[streamIndex] = bytes;
-                       int total = streamProgress.reduce((a, b) => a + b);
-                       progress(total);
-                       
-                       DateTime now = DateTime.now();
-                       if (_lastSampleTime != null && now.difference(_lastSampleTime!).inMilliseconds > 100) {
-                          _addSample(total, now);
-                       }
-                     },
-                     enableRetry: enableRetry,
-                     retryStatus: retryStatus,
-                   ));
-                }
-            
-                try {
-                  await Future.wait(futures);
-                  
-                  // All done
-                  if (!_isCancelled) {
-                    DateTime endTime = DateTime.now();
-                    int totalBytes = streamProgress.reduce((a, b) => a + b);
-                    double duration = endTime.difference(startTime).inMicroseconds / 1000000.0;
-                    
-                    // Use Smart LAN algorithm
-                    double speed = _calculateSmartSpeed();
-                    if (speed == 0) {
-                       speed = (totalBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
-                    }
-                    
-                    var eval = GigabitEvaluator.evaluate(speed);
-                    var result = SpeedTestResult(
-                      transferredBytes: totalBytes,
-                      duration: duration,
-                      startedAt: startTime,
-                      endedAt: endTime,
-                      evaluation: eval,
-                    );
-                    completion(Result.success(result));
-                  }
-                } catch (e) {
-                  if (!_isCancelled) {
-                     completion(Result.failure(e));
-                  }
-                }
-              }
-            
-              // --- Helpers ---
-              
-              void _addSample(int currentBytes, DateTime now) {
-                if (_lastSampleTime == null) {
-                  _lastSampleTime = now;
-                  _lastSampleBytes = currentBytes;
-                  return;
-                }
-            
-                int diffMicros = now.difference(_lastSampleTime!).inMicroseconds;
-                if (diffMicros > 0) {
-                  int diffBytes = currentBytes - _lastSampleBytes;
-                  // Calculate MB/s
-                  double speed = (diffBytes / 1024 / 1024) / (diffMicros / 1000000.0);
-                  
-                  // Filter unrealistic spikes (e.g., > 10 Gbps) caused by buffering
-                  if (speed > 0 && speed < 10000) { 
-                     _speedSamples.add(speed);
-                  }
-                  
-                  _lastSampleBytes = currentBytes;
-                  _lastSampleTime = now;
-                }
-              }
-            
-              double _calculateSmartSpeed() {
-                if (_speedSamples.isEmpty) return 0.0;
-            
-                int total = _speedSamples.length;
-                // If not enough samples, use simple average
-                if (total < 10) {
-                   return _speedSamples.reduce((a, b) => a + b) / total;
-                }
-            
-                // 1. Sequential Warm-up (Time-Domain Filter)
-                // Ignore the first 20% of samples to filter out TCP Slow Start
-                int warmupCount = (total * 0.2).ceil();
-                List<double> steadyStateSamples = _speedSamples.sublist(warmupCount);
-            
-                if (steadyStateSamples.isEmpty) {
-                  return _speedSamples.reduce((a, b) => a + b) / total;
-                }
-            
-                // 2. Outlier Filter (Value-Domain Filter)
-                // Sort the steady state samples to identify spikes and noise
-                steadyStateSamples.sort((a, b) => b.compareTo(a)); // Descending
-            
-                int steadyTotal = steadyStateSamples.length;
-                // Discard Top 10% (OS Buffering Spikes)
-                int trimTop = (steadyTotal * 0.1).ceil();
-                // Discard Bottom 5% (Minor Noise/Jitter)
-                int trimBottom = (steadyTotal * 0.05).ceil();
-            
-                int start = trimTop;
-                int end = steadyTotal - trimBottom;
-            
-                if (start >= end) {
-                   return steadyStateSamples.reduce((a, b) => a + b) / steadyTotal;
-                }
-            
-                // 3. Average the remaining core samples
-                double sum = 0;
-                int count = 0;
-                for (int i = start; i < end; i++) {
-                  sum += steadyStateSamples[i];
-                  count++;
-                }
-            
-                return count > 0 ? sum / count : 0.0;
-              }
+
+            final (double p50, double p90) = _calculateSlidingWindowSpeed();
+            double speed = p50 > 0
+                ? p50
+                : (_serverTotalReceivedBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
+
+            var eval = GigabitEvaluator.evaluate(speed);
+            var result = SpeedTestResult(
+              transferredBytes: _serverTotalReceivedBytes,
+              duration: duration,
+              startedAt: start,
+              endedAt: endTime,
+              evaluation: eval,
+              p50SpeedMBps: p50 > 0 ? p50 : null,
+              p90SpeedMBps: p90 > 0 ? p90 : null,
+            );
+
+            completion(Result.success(result));
+          }
+        },
+        cancelOnError: true,
+      );
+    }, onError: (error) {
+      if (!_isCancelled) {
+        completion(Result.failure(error));
+      }
+    });
+  }
+
+  // --- Client ---
+
+  Future<void> runClient({
+    required String host,
+    required int port,
+    int totalSizeMB = 500,  // Large default for time-bounded mode
+    int? durationSeconds,   // Non-null = time-bounded mode
+    required Function(int) progress,
+    required Function(Result<SpeedTestResult>) completion,
+    Function(int, int)? retryStatus,
+    bool enableRetry = true,
+    int concurrency = 4,
+  }) async {
+    if (kIsWeb) {
+      completion(Result.failure(Exception("Web platform does not support TCP Client Sockets.")));
+      return;
+    }
+
+    _isCancelled = false;
+    _clientSockets.clear();
+    _checkpoints.clear();
+
+    // Divide total size among streams
+    int sizePerStream = (totalSizeMB / concurrency).ceil();
+    if (sizePerStream < 1) sizePerStream = 1;
+
+    List<Future<void>> futures = [];
+    // Shared progress tracking
+    List<int> streamProgress = List.filled(concurrency, 0);
+    DateTime startTime = DateTime.now();
+    _testStartTime = startTime;
+
+    // Compute deadline for time-bounded mode
+    DateTime? deadline = durationSeconds != null
+        ? startTime.add(Duration(seconds: durationSeconds))
+        : null;
+
+    for (int i = 0; i < concurrency; i++) {
+      int streamIndex = i;
+      futures.add(_attemptStreamWithRetry(
+        streamIndex: streamIndex,
+        host: host,
+        port: port,
+        sizeMB: sizePerStream,
+        deadline: deadline,
+        onProgress: (bytes) {
+          streamProgress[streamIndex] = bytes;
+          int total = streamProgress.reduce((a, b) => a + b);
+          progress(total);
+          _addCheckpoint(total, DateTime.now());
+        },
+        enableRetry: enableRetry,
+        retryStatus: retryStatus,
+      ));
+    }
+
+    try {
+      await Future.wait(futures);
+
+      if (!_isCancelled) {
+        DateTime endTime = DateTime.now();
+        int totalBytes = streamProgress.reduce((a, b) => a + b);
+        double duration = endTime.difference(startTime).inMicroseconds / 1000000.0;
+
+        final (double p50, double p90) = _calculateSlidingWindowSpeed();
+        double speed = p50 > 0
+            ? p50
+            : (totalBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
+
+        var eval = GigabitEvaluator.evaluate(speed);
+        var result = SpeedTestResult(
+          transferredBytes: totalBytes,
+          duration: duration,
+          startedAt: startTime,
+          endedAt: endTime,
+          evaluation: eval,
+          p50SpeedMBps: p50 > 0 ? p50 : null,
+          p90SpeedMBps: p90 > 0 ? p90 : null,
+        );
+        completion(Result.success(result));
+      }
+    } catch (e) {
+      if (!_isCancelled) {
+        completion(Result.failure(e));
+      }
+    }
+  }
+
+  // --- Helpers ---
+
+  void _addCheckpoint(int cumulativeBytes, DateTime now) {
+    if (_testStartTime == null) return;
+    int ms = now.difference(_testStartTime!).inMilliseconds;
+    // Enforce minimum 80ms between checkpoints to avoid excessive density
+    if (_checkpoints.isNotEmpty && ms - _checkpoints.last.$1 < 80) return;
+    _checkpoints.add((ms, cumulativeBytes));
+  }
+
+  /// Sliding Window Sustained Throughput algorithm.
+  ///
+  /// Records cumulative byte checkpoints, then computes speed over overlapping
+  /// 500ms windows after a 1500ms warmup (to exclude TCP Slow Start).
+  /// Returns (p50, p90) where p50 is the median sustained speed and p90 is
+  /// the 90th-percentile peak sustained speed, both in MB/s.
+  (double p50, double p90) _calculateSlidingWindowSpeed() {
+    if (_checkpoints.length < 4) return (0, 0);
+
+    const int warmupMs = 1500;   // Discard first 1.5s for TCP Slow Start
+    const int windowMs = 500;    // Sliding window width
+    const int minWindowMs = 100; // Minimum actual window width to include
+
+    final List<double> windowSpeeds = [];
+
+    for (int i = 1; i < _checkpoints.length; i++) {
+      final (int ti, int bi) = _checkpoints[i];
+      if (ti < warmupMs) continue;
+
+      // Find the most recent checkpoint at or before (ti - windowMs)
+      int targetT = ti - windowMs;
+      int j = i - 1;
+      while (j > 0 && _checkpoints[j].$1 > targetT) j--;
+
+      final (int tj, int bj) = _checkpoints[j];
+      int dtMs = ti - tj;
+      if (dtMs < minWindowMs) continue;
+
+      int diffBytes = bi - bj;
+      if (diffBytes <= 0) continue;
+
+      double speedMBps = (diffBytes / 1024 / 1024) / (dtMs / 1000.0);
+      // Filter physically impossible values (> 10 Gbps)
+      if (speedMBps > 0 && speedMBps < 10000) {
+        windowSpeeds.add(speedMBps);
+      }
+    }
+
+    if (windowSpeeds.isEmpty) return (0, 0);
+
+    windowSpeeds.sort();
+    int n = windowSpeeds.length;
+    double p50 = windowSpeeds[n ~/ 2];
+    double p90 = windowSpeeds[(n * 0.9).floor().clamp(0, n - 1)];
+    return (p50, p90);
+  }
+
   Future<void> _attemptStreamWithRetry({
     required int streamIndex,
     required String host,
     required int port,
     required int sizeMB,
+    required DateTime? deadline,
     required Function(int) onProgress,
     required bool enableRetry,
     Function(int, int)? retryStatus,
   }) async {
     int attempts = 0;
     int maxAttempts = enableRetry ? maxRetryAttempts : 1;
-    
+
     while (attempts < maxAttempts && !_isCancelled) {
       attempts++;
-      
+
       try {
         if (attempts > 1 && retryStatus != null) {
           retryStatus(attempts, maxAttempts);
@@ -352,6 +331,7 @@ class SpeedTester {
           host: host,
           port: port,
           sizeMB: sizeMB,
+          deadline: deadline,
           onProgress: onProgress,
         );
         return; // Success
@@ -359,8 +339,7 @@ class SpeedTester {
         if (attempts >= maxAttempts || _isCancelled) {
           rethrow;
         }
-        
-        // Wait before retry
+
         double delay = retryDelaySeconds + (attempts * retryDelayIncrement);
         if (delay > 10) delay = 10;
         await Future.delayed(Duration(milliseconds: (delay * 1000).toInt()));
@@ -373,6 +352,7 @@ class SpeedTester {
     required String host,
     required int port,
     required int sizeMB,
+    required DateTime? deadline,
     required Function(int) onProgress,
   }) async {
     if (_isCancelled) return;
@@ -385,6 +365,7 @@ class SpeedTester {
       await _sendDataStream(
         socket: socket,
         totalSizeMB: sizeMB,
+        deadline: deadline,
         progress: onProgress,
       );
     } catch (e) {
@@ -398,29 +379,31 @@ class SpeedTester {
     required Socket socket,
     required int totalSizeMB,
     required Function(int) progress,
+    DateTime? deadline,
   }) async {
     int targetBytes = totalSizeMB * 1024 * 1024;
     int sentBytes = 0;
-    
-    const int optimizedChunkSize = 256 * 1024; 
-    final chunk = Uint8List(optimizedChunkSize);
-    chunk.fillRange(0, optimizedChunkSize, 0x58);
+
+    const int chunkSize = 256 * 1024;
+    final chunk = Uint8List(chunkSize);
+    chunk.fillRange(0, chunkSize, 0x58);
 
     DateTime lastProgressTime = DateTime.now();
 
     try {
-      while (sentBytes < targetBytes && !_isCancelled) {
-        int remaining = targetBytes - sentBytes;
-        int toSend = remaining < optimizedChunkSize ? remaining : optimizedChunkSize;
-        
-        if (toSend < optimizedChunkSize) {
-           socket.add(chunk.sublist(0, toSend));
-        } else {
-           socket.add(chunk);
-        }
-        
+      while (!_isCancelled) {
+        // Time-bounded mode: stop when deadline is reached
+        if (deadline != null && DateTime.now().isAfter(deadline)) break;
+        // Size-bounded mode: stop when target bytes reached
+        if (deadline == null && sentBytes >= targetBytes) break;
+
+        int toSend = deadline == null
+            ? (targetBytes - sentBytes < chunkSize ? targetBytes - sentBytes : chunkSize)
+            : chunkSize;
+
+        socket.add(toSend == chunkSize ? chunk : chunk.sublist(0, toSend));
         sentBytes += toSend;
-        
+
         DateTime now = DateTime.now();
         if (now.difference(lastProgressTime).inMilliseconds > 100) {
           progress(sentBytes);
@@ -428,14 +411,13 @@ class SpeedTester {
           await Future.delayed(Duration.zero);
         }
       }
-      
+
       // Final progress update
       progress(sentBytes);
 
       await socket.flush();
       await socket.close();
       _clientSockets.remove(socket);
-
     } catch (e) {
       socket.destroy();
       _clientSockets.remove(socket);
