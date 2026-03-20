@@ -58,7 +58,7 @@ class LocalIPHelper {
     } catch (e) {
       print("Error getting IP: $e");
     }
-    return NetworkDetectionResult(ip: "無法取得", connectionType: ConnectionType.unknown);
+    return NetworkDetectionResult(ip: "", connectionType: ConnectionType.unknown);
   }
 
   static bool _isClassB(String ip) {

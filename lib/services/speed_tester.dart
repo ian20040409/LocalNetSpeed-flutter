@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/gigabit_evaluation.dart';
 import '../models/speed_test_result.dart';
 import 'gigabit_evaluator.dart';
@@ -63,6 +64,7 @@ class SpeedTester {
 
   Future<void> runServer({
     required int port,
+    required AppLocalizations l10n,
     required Function(int) progress,
     required Function(Result<SpeedTestResult>) completion,
     Function(int)? onNewConnection,
@@ -139,7 +141,7 @@ class SpeedTester {
                 ? p50
                 : (_serverTotalReceivedBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
 
-            var eval = GigabitEvaluator.evaluate(speed, mode: evaluationMode);
+            var eval = GigabitEvaluator.evaluate(speed, l10n, mode: evaluationMode);
             var result = SpeedTestResult(
               transferredBytes: _serverTotalReceivedBytes,
               duration: duration,
@@ -167,6 +169,7 @@ class SpeedTester {
   Future<void> runClient({
     required String host,
     required int port,
+    required AppLocalizations l10n,
     int totalSizeMB = 500,  // Large default for time-bounded mode
     int? durationSeconds,   // Non-null = time-bounded mode
     required Function(int) progress,
@@ -232,7 +235,7 @@ class SpeedTester {
             ? p50
             : (totalBytes / 1024 / 1024) / (duration > 0 ? duration : 0.0001);
 
-        var eval = GigabitEvaluator.evaluate(speed, mode: evaluationMode);
+        var eval = GigabitEvaluator.evaluate(speed, l10n, mode: evaluationMode);
         var result = SpeedTestResult(
           transferredBytes: totalBytes,
           duration: duration,

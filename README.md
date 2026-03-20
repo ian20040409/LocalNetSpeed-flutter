@@ -6,6 +6,7 @@ A high-performance local network speed testing tool built with Flutter. This app
 
 ## Features
 
+- **Multilingual**: Supports English and Traditional Chinese (繁體中文). The app automatically switches based on device language settings.
 - **Cross-Platform Support**: Measure speeds between Android, iOS, macOS, Windows, and Linux.
 - **Client/Server Modes**:
   - **Server Mode**: Host a listener on your device to receive data.
@@ -117,7 +118,7 @@ Both workflows are triggered via **Actions → Run workflow** and never run auto
 2. **Start the Client**: On the second device, select "Client" mode, enter the Server's IP address, and configure the test:
    - **Size-bounded** (default): Enter the data size in MB and click "Start Test".
    - **Time-bounded**: Enable the "時間導向測試" toggle, enter the duration in seconds, and click "Start Test".
-3. **Evaluation Mode**: The app auto-detects WiFi vs wired connections and selects the appropriate evaluation mode. You can manually switch between "Gigabit 有線" and "WiFi 區網", or tap "自動" to re-enable auto-detection.
+3. **Evaluation Mode**: The app auto-detects WiFi vs wired connections and selects the appropriate evaluation mode. You can manually switch between "Gigabit LAN" and "WiFi LAN" (or "Gigabit 有線" / "WiFi 區網" in Chinese), or tap "Auto" / "自動" to re-enable auto-detection.
 4. **View Results**: The result dialog displays the P50 speed on the gauge, plus a P90 badge alongside total transferred data and duration. The log view shows full P50/P90 details and evaluation based on the selected mode.
 
 ## Related Projects

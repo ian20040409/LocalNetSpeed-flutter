@@ -1,3 +1,4 @@
+import '../generated/l10n/app_localizations.dart';
 import '../models/gigabit_evaluation.dart';
 
 class GigabitEvaluator {
@@ -26,51 +27,51 @@ class GigabitEvaluator {
     }
   }
 
-  static GigabitEvaluation evaluate(double speedMBps, {EvaluationMode mode = EvaluationMode.gigabit}) {
+  static GigabitEvaluation evaluate(double speedMBps, AppLocalizations l10n, {EvaluationMode mode = EvaluationMode.gigabit}) {
     switch (mode) {
       case EvaluationMode.gigabit:
-        return _evaluateGigabit(speedMBps);
+        return _evaluateGigabit(speedMBps, l10n);
       case EvaluationMode.wifi:
-        return _evaluateWifi(speedMBps);
+        return _evaluateWifi(speedMBps, l10n);
     }
   }
 
-  static GigabitEvaluation _evaluateGigabit(double speedMBps) {
+  static GigabitEvaluation _evaluateGigabit(double speedMBps, AppLocalizations l10n) {
     final percent = (speedMBps / gigabitTheoreticalMBps) * 100.0;
     String rating;
     String icon;
     String message;
 
     if (speedMBps >= gigabitPracticalThreshold) {
-      rating = "優秀";
+      rating = l10n.ratingExcellent;
       icon = "✅";
-      message = "恭喜！您的網路已達到 Gigabit 等級效能";
+      message = l10n.evalGigabitExcellentMessage;
     } else if (speedMBps >= 80) {
-      rating = "良好";
+      rating = l10n.ratingGood;
       icon = "⚡";
-      message = "接近 Gigabit 效能，但仍有提升空間";
+      message = l10n.evalGigabitGoodMessage;
     } else if (speedMBps >= 50) {
-      rating = "一般";
+      rating = l10n.ratingAverage;
       icon = "⚠️";
-      message = "網路速度一般，建議檢查網路設備或連線品質";
+      message = l10n.evalGigabitAverageMessage;
     } else if (speedMBps >= 10) {
-      rating = "偏慢";
+      rating = l10n.ratingSlow;
       icon = "🐌";
-      message = "網路速度偏慢，可能未使用 Gigabit 設備";
+      message = l10n.evalGigabitSlowMessage;
     } else {
-      rating = "很慢";
+      rating = l10n.ratingVerySlow;
       icon = "🚫";
-      message = "網路速度很慢，建議檢查網路連線問題";
+      message = l10n.evalGigabitVerySlowMessage;
     }
 
     List<String> suggestions = [];
     if (speedMBps < gigabitPracticalThreshold) {
       suggestions = [
-        "確認使用 Cat5e 或更高等級的網路線",
-        "檢查網路交換器是否支援 Gigabit",
-        "確認網路卡設定為 1000 Mbps 全雙工",
-        "關閉不必要的網路程式和服務",
-        "檢查是否有網路瓶頸或干擾"
+        l10n.evalGigabitSuggestion1,
+        l10n.evalGigabitSuggestion2,
+        l10n.evalGigabitSuggestion3,
+        l10n.evalGigabitSuggestion4,
+        l10n.evalGigabitSuggestion5,
       ];
     }
 
@@ -85,43 +86,43 @@ class GigabitEvaluator {
     );
   }
 
-  static GigabitEvaluation _evaluateWifi(double speedMBps) {
+  static GigabitEvaluation _evaluateWifi(double speedMBps, AppLocalizations l10n) {
     final percent = (speedMBps / wifiTheoreticalMBps) * 100.0;
     String rating;
     String icon;
     String message;
 
     if (speedMBps >= wifiExcellentMBps) {
-      rating = "優秀";
+      rating = l10n.ratingExcellent;
       icon = "📶";
-      message = "WiFi 6 效能卓越，接近有線速度";
+      message = l10n.evalWifiExcellentMessage;
     } else if (speedMBps >= wifiGoodMBps) {
-      rating = "良好";
+      rating = l10n.ratingGood;
       icon = "✅";
-      message = "WiFi 6 效能良好，符合正常預期";
+      message = l10n.evalWifiGoodMessage;
     } else if (speedMBps >= wifiAverageMBps) {
-      rating = "一般";
+      rating = l10n.ratingAverage;
       icon = "⚡";
-      message = "WiFi 速度中等，可能為 WiFi 5 或訊號受限";
+      message = l10n.evalWifiAverageMessage;
     } else if (speedMBps >= wifiSlowMBps) {
-      rating = "偏慢";
+      rating = l10n.ratingSlow;
       icon = "⚠️";
-      message = "WiFi 速度偏慢，建議靠近路由器或排除干擾";
+      message = l10n.evalWifiSlowMessage;
     } else {
-      rating = "很慢";
+      rating = l10n.ratingVerySlow;
       icon = "🚫";
-      message = "WiFi 速度很慢，可能為 WiFi 4 或訊號極弱";
+      message = l10n.evalWifiVerySlowMessage;
     }
 
     List<String> suggestions = [];
     if (speedMBps < wifiExcellentMBps) {
       suggestions = [
-        "確認路由器支援 WiFi 6 (802.11ax)",
-        "縮短裝置與路由器的距離",
-        "減少同頻段的干擾源（微波爐、藍牙等）",
-        "確認連接到 5GHz 頻段而非 2.4GHz",
-        "檢查路由器頻寬設定（建議 80MHz 或 160MHz）",
-        "減少同時連線的裝置數量",
+        l10n.evalWifiSuggestion1,
+        l10n.evalWifiSuggestion2,
+        l10n.evalWifiSuggestion3,
+        l10n.evalWifiSuggestion4,
+        l10n.evalWifiSuggestion5,
+        l10n.evalWifiSuggestion6,
       ];
     }
 

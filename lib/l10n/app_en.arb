@@ -1,0 +1,431 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "LocalNetSpeed",
+  "@appTitle": { "description": "Application name shown in the app bar" },
+
+  "logTooltip": "Logs",
+  "@logTooltip": { "description": "Tooltip for the log icon button in the app bar" },
+
+  "localIpLabel": "Local IP",
+  "@localIpLabel": { "description": "Label above the local IP address" },
+
+  "ipCopiedSnackbar": "IP address copied to clipboard",
+  "@ipCopiedSnackbar": { "description": "Snackbar message after copying IP" },
+
+  "serverIpLabel": "Server IP",
+  "@serverIpLabel": { "description": "TextField label for server IP input" },
+
+  "portLabel": "Port",
+  "@portLabel": { "description": "TextField label for port number" },
+
+  "sizeLabel": "Size (MB)",
+  "@sizeLabel": { "description": "TextField label for transfer size in MB" },
+
+  "durationLabel": "Duration (sec)",
+  "@durationLabel": { "description": "TextField label for time-bounded duration" },
+
+  "timeBoundedToggle": "Time-bounded test",
+  "@timeBoundedToggle": { "description": "Label for the time-bounded mode switch" },
+
+  "evaluationModeAutoLabel": "Evaluation mode: {mode} (Auto)",
+  "@evaluationModeAutoLabel": {
+    "description": "Evaluation mode row text when in auto mode",
+    "placeholders": { "mode": { "type": "String" } }
+  },
+
+  "evaluationModeLabel": "Evaluation mode: {mode}",
+  "@evaluationModeLabel": {
+    "description": "Evaluation mode row text when manually set",
+    "placeholders": { "mode": { "type": "String" } }
+  },
+
+  "autoButton": "Auto",
+  "@autoButton": { "description": "Button to re-enable automatic evaluation mode selection" },
+
+  "ratingStandardsTooltip": "Rating Standards",
+  "@ratingStandardsTooltip": { "description": "Tooltip for the rating standards info icon" },
+
+  "serverRunning": "Server running",
+  "@serverRunning": { "description": "Status label shown when server is active" },
+
+  "serverConnectionCount": " ({count} connection)",
+  "@serverConnectionCount": {
+    "description": "Appended to serverRunning showing active connection count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "stopButton": "Stop",
+  "@stopButton": { "description": "Stop button label" },
+
+  "forceStopButton": "Force Stop",
+  "@forceStopButton": { "description": "Force stop button label (server mode)" },
+
+  "startServerButton": "Start Server",
+  "@startServerButton": { "description": "Start button label in server mode" },
+
+  "startTestButton": "Start Test",
+  "@startTestButton": { "description": "Start button label in client mode" },
+
+  "speedTestModeServer": "Server",
+  "@speedTestModeServer": { "description": "SegmentedButton label for server mode" },
+
+  "speedTestModeClient": "Client",
+  "@speedTestModeClient": { "description": "SegmentedButton label for client mode" },
+
+  "evaluationModeGigabit": "Gigabit LAN",
+  "@evaluationModeGigabit": { "description": "SegmentedButton label for gigabit evaluation mode" },
+
+  "evaluationModeWifi": "WiFi LAN",
+  "@evaluationModeWifi": { "description": "SegmentedButton label for wifi evaluation mode" },
+
+  "ratingStandardsTitle": "{mode} Rating Standards",
+  "@ratingStandardsTitle": {
+    "description": "Title of the rating standards dialog",
+    "placeholders": { "mode": { "type": "String" } }
+  },
+
+  "wifiThroughputNote": "Based on actual TCP throughput, not wireless air speed",
+  "@wifiThroughputNote": { "description": "Note shown in the WiFi rating standards dialog" },
+
+  "ratingExcellent": "Excellent",
+  "@ratingExcellent": { "description": "Rating tier: excellent" },
+
+  "ratingGood": "Good",
+  "@ratingGood": { "description": "Rating tier: good" },
+
+  "ratingAverage": "Average",
+  "@ratingAverage": { "description": "Rating tier: average" },
+
+  "ratingSlow": "Slow",
+  "@ratingSlow": { "description": "Rating tier: slow" },
+
+  "ratingVerySlow": "Very Slow",
+  "@ratingVerySlow": { "description": "Rating tier: very slow" },
+
+  "ratingStandardsGigabitRow1Desc": "Gigabit-class performance",
+  "@ratingStandardsGigabitRow1Desc": { "description": "Gigabit table row 1 description" },
+  "ratingStandardsGigabitRow2Desc": "Near Gigabit performance",
+  "@ratingStandardsGigabitRow2Desc": { "description": "Gigabit table row 2 description" },
+  "ratingStandardsGigabitRow3Desc": "Check your network equipment",
+  "@ratingStandardsGigabitRow3Desc": { "description": "Gigabit table row 3 description" },
+  "ratingStandardsGigabitRow4Desc": "Possibly no Gigabit equipment",
+  "@ratingStandardsGigabitRow4Desc": { "description": "Gigabit table row 4 description" },
+  "ratingStandardsGigabitRow5Desc": "Check your network connection",
+  "@ratingStandardsGigabitRow5Desc": { "description": "Gigabit table row 5 description" },
+  "ratingStandardsWifiRow1Desc": "WiFi 6 outstanding performance",
+  "@ratingStandardsWifiRow1Desc": { "description": "WiFi table row 1 description" },
+  "ratingStandardsWifiRow2Desc": "WiFi 6 typical performance",
+  "@ratingStandardsWifiRow2Desc": { "description": "WiFi table row 2 description" },
+  "ratingStandardsWifiRow3Desc": "WiFi 5 or signal-limited",
+  "@ratingStandardsWifiRow3Desc": { "description": "WiFi table row 3 description" },
+  "ratingStandardsWifiRow4Desc": "Weak signal or far from router",
+  "@ratingStandardsWifiRow4Desc": { "description": "WiFi table row 4 description" },
+  "ratingStandardsWifiRow5Desc": "WiFi 4 or extremely weak signal",
+  "@ratingStandardsWifiRow5Desc": { "description": "WiFi table row 5 description" },
+
+  "closeButton": "Close",
+  "@closeButton": { "description": "Close button in dialogs" },
+
+  "resultTotal": "Total",
+  "@resultTotal": { "description": "Stat badge label for total bytes transferred" },
+
+  "resultDuration": "Duration",
+  "@resultDuration": { "description": "Stat badge label for test duration" },
+
+  "resultDurationValue": "{seconds} sec",
+  "@resultDurationValue": {
+    "description": "Formatted duration value",
+    "placeholders": { "seconds": { "type": "String" } }
+  },
+
+  "logScreenTitle": "Logs",
+  "@logScreenTitle": { "description": "Title of the log screen" },
+
+  "logEmpty": "No logs yet",
+  "@logEmpty": { "description": "Placeholder text when log is empty" },
+
+  "fetchingIp": "Fetching...",
+  "@fetchingIp": { "description": "Placeholder while local IP is being detected" },
+
+  "ipUnavailable": "Unavailable",
+  "@ipUnavailable": { "description": "Shown when local IP cannot be obtained" },
+
+  "statusNotStarted": "Not started",
+  "@statusNotStarted": { "description": "Initial progress text before any test" },
+
+  "statusPreparing": "Preparing...",
+  "@statusPreparing": { "description": "Progress text during test initialization" },
+
+  "statusConnecting": "Connecting...",
+  "@statusConnecting": { "description": "Progress text while attempting to connect" },
+
+  "statusCancelled": "Cancelled",
+  "@statusCancelled": { "description": "Progress text after user cancels" },
+
+  "statusDone": "Done",
+  "@statusDone": { "description": "Progress text after successful test completion" },
+
+  "statusWaitingConnection": "Waiting for connection...",
+  "@statusWaitingConnection": { "description": "Server status waiting for next client" },
+
+  "statusForceStopped": "Server force stopped",
+  "@statusForceStopped": { "description": "Progress text after force stop" },
+
+  "statusErrorPort": "Invalid port number",
+  "@statusErrorPort": { "description": "Validation error for bad port" },
+
+  "statusErrorNoHost": "Please enter server IP",
+  "@statusErrorNoHost": { "description": "Validation error when no host entered" },
+
+  "statusErrorDuration": "Invalid test duration",
+  "@statusErrorDuration": { "description": "Validation error for bad duration" },
+
+  "statusErrorSize": "Invalid data size",
+  "@statusErrorSize": { "description": "Validation error for bad size" },
+
+  "statusError": "Error: {message}",
+  "@statusError": {
+    "description": "Generic error status",
+    "placeholders": { "message": { "type": "String" } }
+  },
+
+  "statusReceived": "Received {mb} MB",
+  "@statusReceived": {
+    "description": "Server progress showing bytes received",
+    "placeholders": { "mb": { "type": "String" } }
+  },
+
+  "statusSent": "Sent {mb} MB",
+  "@statusSent": {
+    "description": "Client time-bounded progress",
+    "placeholders": { "mb": { "type": "String" } }
+  },
+
+  "statusProgress": "Progress {percent}%",
+  "@statusProgress": {
+    "description": "Client size-bounded progress percentage",
+    "placeholders": { "percent": { "type": "String" } }
+  },
+
+  "statusRetrying": "Retrying connection ({attempt}/{max})...",
+  "@statusRetrying": {
+    "description": "Progress text during retry",
+    "placeholders": {
+      "attempt": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+
+  "statusWaitingServer": "Waiting for server to start... ({attempt}/{max})",
+  "@statusWaitingServer": {
+    "description": "Progress text during long retry wait",
+    "placeholders": {
+      "attempt": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+
+  "logServerStarted": "Server started, port {port}, waiting for connection...",
+  "@logServerStarted": {
+    "description": "Log line when server starts",
+    "placeholders": { "port": { "type": "int" } }
+  },
+
+  "logNewConnection": "New connection #{count}",
+  "@logNewConnection": {
+    "description": "Log line for each new client connection",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "logClientConnectingTimeBounded": "Client connecting to {host}:{port}, time-bounded test {dur}s (4 parallel streams)...",
+  "@logClientConnectingTimeBounded": {
+    "description": "Log line when client starts a time-bounded test",
+    "placeholders": {
+      "host": { "type": "String" },
+      "port": { "type": "int" },
+      "dur": { "type": "int" }
+    }
+  },
+
+  "logClientConnectingSizeBounded": "Client connecting to {host}:{port}, sending {size} MB (4 parallel streams)...",
+  "@logClientConnectingSizeBounded": {
+    "description": "Log line when client starts a size-bounded test",
+    "placeholders": {
+      "host": { "type": "String" },
+      "port": { "type": "int" },
+      "size": { "type": "int" }
+    }
+  },
+
+  "logRetryAttempt": "Connection attempt #{attempt}...",
+  "@logRetryAttempt": {
+    "description": "Log line for a retry attempt",
+    "placeholders": { "attempt": { "type": "int" } }
+  },
+
+  "logWaitingServer": "Still waiting for server to start... (attempt {attempt})",
+  "@logWaitingServer": {
+    "description": "Log line during long retry wait",
+    "placeholders": { "attempt": { "type": "int" } }
+  },
+
+  "logCancelled": "Test cancelled",
+  "@logCancelled": { "description": "Log line when test is cancelled" },
+
+  "logForceStopped": "Server force stopped",
+  "@logForceStopped": { "description": "Log line when server is force stopped" },
+
+  "logError": "Error: {message}",
+  "@logError": {
+    "description": "Log line for an error",
+    "placeholders": { "message": { "type": "String" } }
+  },
+
+  "logServerContinues": "--- Server continuing, waiting for next connection ---",
+  "@logServerContinues": { "description": "Log separator after server handles one client" },
+
+  "logResultHeader": "--- Test Result ---",
+  "@logResultHeader": { "description": "Header line in formatted result log" },
+
+  "logResultTotal": "Total: {mb} MB",
+  "@logResultTotal": {
+    "description": "Log line for total bytes",
+    "placeholders": { "mb": { "type": "String" } }
+  },
+
+  "logResultDuration": "Duration: {sec} sec",
+  "@logResultDuration": {
+    "description": "Log line for test duration",
+    "placeholders": { "sec": { "type": "String" } }
+  },
+
+  "logResultSpeed": "Speed: {speed} {unit}",
+  "@logResultSpeed": {
+    "description": "Log line for speed",
+    "placeholders": {
+      "speed": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+
+  "logResultP50": "P50 (median sustained): {speed} {unit}",
+  "@logResultP50": {
+    "description": "Log line for P50",
+    "placeholders": {
+      "speed": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+
+  "logResultP90": "P90 (peak sustained): {speed} {unit}",
+  "@logResultP90": {
+    "description": "Log line for P90",
+    "placeholders": {
+      "speed": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+
+  "logResultEvalHeader": "--- {mode} Evaluation ---",
+  "@logResultEvalHeader": {
+    "description": "Evaluation section header in log",
+    "placeholders": { "mode": { "type": "String" } }
+  },
+
+  "logResultActualSpeed": "Actual speed: {speed} {unit}",
+  "@logResultActualSpeed": {
+    "description": "Log line for actual speed",
+    "placeholders": {
+      "speed": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+
+  "logResultTheoretical": "Theoretical: {speed} {unit}",
+  "@logResultTheoretical": {
+    "description": "Log line for theoretical max speed",
+    "placeholders": {
+      "speed": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+
+  "logResultPercent": "Achievement: {percent}%",
+  "@logResultPercent": {
+    "description": "Log line for achievement percentage",
+    "placeholders": { "percent": { "type": "String" } }
+  },
+
+  "logResultRating": "Rating: {icon} {rating}",
+  "@logResultRating": {
+    "description": "Log line for rating",
+    "placeholders": {
+      "icon": { "type": "String" },
+      "rating": { "type": "String" }
+    }
+  },
+
+  "logResultSuggestion": "Suggestion: {message}",
+  "@logResultSuggestion": {
+    "description": "Log line for suggestion message",
+    "placeholders": { "message": { "type": "String" } }
+  },
+
+  "logResultImprovements": "Improvement tips:",
+  "@logResultImprovements": { "description": "Header before the improvement suggestions list" },
+
+  "evalGigabitExcellentMessage": "Congratulations! Your network has reached Gigabit-class performance",
+  "@evalGigabitExcellentMessage": { "description": "Gigabit eval: excellent message" },
+
+  "evalGigabitGoodMessage": "Near Gigabit performance, but there is still room to improve",
+  "@evalGigabitGoodMessage": { "description": "Gigabit eval: good message" },
+
+  "evalGigabitAverageMessage": "Average network speed, recommend checking equipment or connection quality",
+  "@evalGigabitAverageMessage": { "description": "Gigabit eval: average message" },
+
+  "evalGigabitSlowMessage": "Network speed is slow, possibly not using Gigabit equipment",
+  "@evalGigabitSlowMessage": { "description": "Gigabit eval: slow message" },
+
+  "evalGigabitVerySlowMessage": "Network speed is very slow, recommend checking your network connection",
+  "@evalGigabitVerySlowMessage": { "description": "Gigabit eval: very slow message" },
+
+  "evalGigabitSuggestion1": "Confirm you are using Cat5e or higher cable",
+  "@evalGigabitSuggestion1": { "description": "Gigabit improvement suggestion 1" },
+  "evalGigabitSuggestion2": "Check that your network switch supports Gigabit",
+  "@evalGigabitSuggestion2": { "description": "Gigabit improvement suggestion 2" },
+  "evalGigabitSuggestion3": "Confirm NIC is set to 1000 Mbps full duplex",
+  "@evalGigabitSuggestion3": { "description": "Gigabit improvement suggestion 3" },
+  "evalGigabitSuggestion4": "Close unnecessary network programs and services",
+  "@evalGigabitSuggestion4": { "description": "Gigabit improvement suggestion 4" },
+  "evalGigabitSuggestion5": "Check for network bottlenecks or interference",
+  "@evalGigabitSuggestion5": { "description": "Gigabit improvement suggestion 5" },
+
+  "evalWifiExcellentMessage": "Excellent WiFi 6 performance, close to wired speed",
+  "@evalWifiExcellentMessage": { "description": "WiFi eval: excellent message" },
+
+  "evalWifiGoodMessage": "Good WiFi 6 performance, meets normal expectations",
+  "@evalWifiGoodMessage": { "description": "WiFi eval: good message" },
+
+  "evalWifiAverageMessage": "Moderate WiFi speed, possibly WiFi 5 or signal-limited",
+  "@evalWifiAverageMessage": { "description": "WiFi eval: average message" },
+
+  "evalWifiSlowMessage": "WiFi speed is slow, recommend moving closer to router or eliminating interference",
+  "@evalWifiSlowMessage": { "description": "WiFi eval: slow message" },
+
+  "evalWifiVerySlowMessage": "WiFi speed is very slow, possibly WiFi 4 or extremely weak signal",
+  "@evalWifiVerySlowMessage": { "description": "WiFi eval: very slow message" },
+
+  "evalWifiSuggestion1": "Confirm your router supports WiFi 6 (802.11ax)",
+  "@evalWifiSuggestion1": { "description": "WiFi improvement suggestion 1" },
+  "evalWifiSuggestion2": "Shorten the distance between device and router",
+  "@evalWifiSuggestion2": { "description": "WiFi improvement suggestion 2" },
+  "evalWifiSuggestion3": "Reduce interference sources on the same band (microwave, Bluetooth, etc.)",
+  "@evalWifiSuggestion3": { "description": "WiFi improvement suggestion 3" },
+  "evalWifiSuggestion4": "Confirm connection is on the 5 GHz band, not 2.4 GHz",
+  "@evalWifiSuggestion4": { "description": "WiFi improvement suggestion 4" },
+  "evalWifiSuggestion5": "Check router bandwidth setting (80 MHz or 160 MHz recommended)",
+  "@evalWifiSuggestion5": { "description": "WiFi improvement suggestion 5" },
+  "evalWifiSuggestion6": "Reduce the number of simultaneously connected devices",
+  "@evalWifiSuggestion6": { "description": "WiFi improvement suggestion 6" }
+}

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/gigabit_evaluation.dart';
+import '../models/gigabit_evaluation_l10n.dart';
 import '../models/speed_test_mode.dart';
+import '../models/speed_test_mode_l10n.dart';
 import '../services/local_ip_helper.dart';
 import '../view_models/content_view_model.dart';
 import 'log_view.dart';
@@ -30,14 +33,20 @@ class _ContentViewState extends State<ContentView> {
     _portController = TextEditingController(text: vm.port);
     _sizeController = TextEditingController(text: vm.sizeMB);
     _durationController = TextEditingController(text: vm.durationSeconds);
-    
+
     // Listen for result changes
     vm.addListener(_checkResult);
-    
+
     // Initial fetch
     WidgetsBinding.instance.addPostFrameCallback((_) {
       vm.fetchLocalIP();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    context.read<ContentViewModel>().setL10n(AppLocalizations.of(context));
   }
 
   void _checkResult() {
@@ -47,7 +56,7 @@ class _ContentViewState extends State<ContentView> {
       _isShowingResult = true;
       showDialog(
         context: context,
-        barrierDismissible: false, // User must click close
+        barrierDismissible: false,
         builder: (ctx) {
           return ResultWindow(
             result: vm.result!,
@@ -56,13 +65,8 @@ class _ContentViewState extends State<ContentView> {
         },
       ).then((_) {
         _isShowingResult = false;
-        // When dialog closes, we might want to clear result or keep it?
-        // If we keep it, this listener might trigger again if we aren't careful?
-        // No, listener triggers on notify. If notify happens and result is still there...
-        // But we have _isShowingResult flag.
-        // It's safer to clear the result in VM so next test can start clean.
         if (mounted) {
-             context.read<ContentViewModel>().clearResult();
+          context.read<ContentViewModel>().clearResult();
         }
       });
     }
@@ -80,9 +84,10 @@ class _ContentViewState extends State<ContentView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("LocalNetSpeed"),
+        title: Text(l10n.appTitle),
         centerTitle: true,
         actions: [
           IconButton(
@@ -93,7 +98,7 @@ class _ContentViewState extends State<ContentView> {
                 MaterialPageRoute(builder: (_) => const LogView()),
               );
             },
-            tooltip: "日誌",
+            tooltip: l10n.logTooltip,
           ),
         ],
       ),
@@ -114,7 +119,7 @@ class _ContentViewState extends State<ContentView> {
                           segments: SpeedTestMode.values.map((m) {
                             return ButtonSegment<SpeedTestMode>(
                               value: m,
-                              label: Text(m.label),
+                              label: Text(m.localizedLabel(context)),
                               icon: Icon(m == SpeedTestMode.server ? Icons.dns : Icons.phone_iphone),
                             );
                           }).toList(),
@@ -145,7 +150,7 @@ class _ContentViewState extends State<ContentView> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text("本機 IP", style: Theme.of(context).textTheme.bodySmall),
+                                    Text(l10n.localIpLabel, style: Theme.of(context).textTheme.bodySmall),
                                     Text(
                                       vm.localIP,
                                       style: const TextStyle(
@@ -162,9 +167,9 @@ class _ContentViewState extends State<ContentView> {
                                 onPressed: () {
                                   Clipboard.setData(ClipboardData(text: vm.localIP));
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("IP 位址已複製到剪貼板"),
-                                      duration: Duration(seconds: 1),
+                                    SnackBar(
+                                      content: Text(l10n.ipCopiedSnackbar),
+                                      duration: const Duration(seconds: 1),
                                     ),
                                   );
                                   HapticFeedback.lightImpact();
@@ -190,9 +195,9 @@ class _ContentViewState extends State<ContentView> {
                               Expanded(
                                 child: TextField(
                                   controller: _hostController,
-                                  decoration: const InputDecoration(
-                                    labelText: "伺服器 IP",
-                                    border: OutlineInputBorder(),
+                                  decoration: InputDecoration(
+                                    labelText: l10n.serverIpLabel,
+                                    border: const OutlineInputBorder(),
                                     isDense: true,
                                   ),
                                   onChanged: (v) => vm.host = v,
@@ -221,7 +226,7 @@ class _ContentViewState extends State<ContentView> {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "時間導向測試",
+                                  l10n.timeBoundedToggle,
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ),
@@ -246,9 +251,9 @@ class _ContentViewState extends State<ContentView> {
                               child: TextField(
                                 controller: _portController,
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: "埠號",
-                                  border: OutlineInputBorder(),
+                                decoration: InputDecoration(
+                                  labelText: l10n.portLabel,
+                                  border: const OutlineInputBorder(),
                                   isDense: true,
                                 ),
                                 onChanged: (v) => vm.port = v,
@@ -266,9 +271,9 @@ class _ContentViewState extends State<ContentView> {
                                   child: TextField(
                                     controller: _durationController,
                                     keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      labelText: "時間 (秒)",
-                                      border: OutlineInputBorder(),
+                                    decoration: InputDecoration(
+                                      labelText: l10n.durationLabel,
+                                      border: const OutlineInputBorder(),
                                       isDense: true,
                                     ),
                                     onChanged: (v) => vm.durationSeconds = v,
@@ -279,9 +284,9 @@ class _ContentViewState extends State<ContentView> {
                                   child: TextField(
                                     controller: _sizeController,
                                     keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      labelText: "大小 (MB)",
-                                      border: OutlineInputBorder(),
+                                    decoration: InputDecoration(
+                                      labelText: l10n.sizeLabel,
+                                      border: const OutlineInputBorder(),
                                       isDense: true,
                                     ),
                                     onChanged: (v) => vm.sizeMB = v,
@@ -323,8 +328,8 @@ class _ContentViewState extends State<ContentView> {
                             Expanded(
                               child: Text(
                                 vm.autoEvaluationMode
-                                    ? "評估模式：${vm.evaluationMode.label}（自動）"
-                                    : "評估模式：${vm.evaluationMode.label}",
+                                    ? l10n.evaluationModeAutoLabel(vm.evaluationMode.localizedLabel(context))
+                                    : l10n.evaluationModeLabel(vm.evaluationMode.localizedLabel(context)),
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
@@ -334,12 +339,12 @@ class _ContentViewState extends State<ContentView> {
                                   vm.autoEvaluationMode = true;
                                   HapticFeedback.selectionClick();
                                 },
-                                child: const Text("自動"),
+                                child: Text(l10n.autoButton),
                               ),
                             IconButton(
                               icon: const Icon(Icons.info_outline, size: 20),
                               color: Colors.grey,
-                              tooltip: "評分標準",
+                              tooltip: l10n.ratingStandardsTooltip,
                               onPressed: () => _showRatingStandards(context, vm.evaluationMode),
                             ),
                           ],
@@ -349,7 +354,7 @@ class _ContentViewState extends State<ContentView> {
                           segments: EvaluationMode.values.map((m) {
                             return ButtonSegment<EvaluationMode>(
                               value: m,
-                              label: Text(m.label),
+                              label: Text(m.localizedLabel(context)),
                               icon: Icon(m == EvaluationMode.gigabit
                                   ? Icons.cable
                                   : Icons.wifi),
@@ -364,7 +369,7 @@ class _ContentViewState extends State<ContentView> {
                         const SizedBox(height: 16),
 
                         // Status
-                        if (vm.isRunning || (vm.progressText.isNotEmpty && vm.progressText != "尚未開始"))
+                        if (vm.isRunning || vm.progressText.isNotEmpty)
                           _buildCard(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,9 +386,9 @@ class _ContentViewState extends State<ContentView> {
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      const Text("伺服器運行中", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                                      Text(l10n.serverRunning, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
                                       if (vm.serverConnectionCount > 0)
-                                        Text(" (${vm.serverConnectionCount} 連線)", style: const TextStyle(color: Colors.grey)),
+                                        Text(l10n.serverConnectionCount(vm.serverConnectionCount), style: const TextStyle(color: Colors.grey)),
                                     ],
                                   ),
                                 if (vm.isRunning && vm.mode == SpeedTestMode.client) ...[
@@ -399,13 +404,11 @@ class _ContentViewState extends State<ContentView> {
                               ],
                             ),
                           ),
-                          
-                        // Note: Result Card removed, now handled by Dialog
                       ],
                     ),
                   ),
                 ),
-                
+
                 // Bottom Actions
                 SafeArea(
                   top: false,
@@ -431,7 +434,7 @@ class _ContentViewState extends State<ContentView> {
                                 HapticFeedback.lightImpact();
                               },
                               icon: const Icon(Icons.stop_circle),
-                              label: const Text("停止"),
+                              label: Text(l10n.stopButton),
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.red,
                                 minimumSize: const Size(0, 50),
@@ -446,7 +449,7 @@ class _ContentViewState extends State<ContentView> {
                                   vm.forceStopServer();
                                 },
                                 icon: const Icon(Icons.dangerous),
-                                label: const Text("強制停止"),
+                                label: Text(l10n.forceStopButton),
                                 style: FilledButton.styleFrom(
                                   backgroundColor: Colors.orange,
                                   minimumSize: const Size(0, 50),
@@ -462,7 +465,7 @@ class _ContentViewState extends State<ContentView> {
                                 HapticFeedback.mediumImpact();
                               },
                               icon: Icon(vm.mode == SpeedTestMode.server ? Icons.play_circle : Icons.bolt),
-                              label: Text(vm.mode == SpeedTestMode.server ? "啟動伺服器" : "開始測試"),
+                              label: Text(vm.mode == SpeedTestMode.server ? l10n.startServerButton : l10n.startTestButton),
                               style: FilledButton.styleFrom(
                                 minimumSize: const Size(0, 50),
                               ),
@@ -481,21 +484,22 @@ class _ContentViewState extends State<ContentView> {
   }
 
   void _showRatingStandards(BuildContext context, EvaluationMode mode) {
+    final l10n = AppLocalizations.of(context);
     final isWifi = mode == EvaluationMode.wifi;
     final rows = isWifi
-        ? const [
-            ("優秀", "📶", "≥ 600 Mbps", "WiFi 6 卓越效能"),
-            ("良好", "✅", "≥ 350 Mbps", "WiFi 6 正常效能"),
-            ("一般", "⚡", "≥ 150 Mbps", "WiFi 5 或訊號受限"),
-            ("偏慢", "⚠️", "≥ 50 Mbps",  "訊號弱或距路由器遠"),
-            ("很慢", "🚫", "< 50 Mbps",  "WiFi 4 或訊號極弱"),
+        ? [
+            (l10n.ratingExcellent, "📶", "≥ 600 Mbps", l10n.ratingStandardsWifiRow1Desc),
+            (l10n.ratingGood,      "✅", "≥ 350 Mbps", l10n.ratingStandardsWifiRow2Desc),
+            (l10n.ratingAverage,   "⚡", "≥ 150 Mbps", l10n.ratingStandardsWifiRow3Desc),
+            (l10n.ratingSlow,      "⚠️", "≥ 50 Mbps",  l10n.ratingStandardsWifiRow4Desc),
+            (l10n.ratingVerySlow,  "🚫", "< 50 Mbps",  l10n.ratingStandardsWifiRow5Desc),
           ]
-        : const [
-            ("優秀", "✅", "≥ 800 Mbps", "Gigabit 等級效能"),
-            ("良好", "⚡", "≥ 640 Mbps", "接近 Gigabit 效能"),
-            ("一般", "⚠️", "≥ 400 Mbps", "建議檢查網路設備"),
-            ("偏慢", "🐌", "≥ 80 Mbps",  "可能未使用 Gigabit 設備"),
-            ("很慢", "🚫", "< 80 Mbps",  "建議檢查網路連線"),
+        : [
+            (l10n.ratingExcellent, "✅", "≥ 800 Mbps", l10n.ratingStandardsGigabitRow1Desc),
+            (l10n.ratingGood,      "⚡", "≥ 640 Mbps", l10n.ratingStandardsGigabitRow2Desc),
+            (l10n.ratingAverage,   "⚠️", "≥ 400 Mbps", l10n.ratingStandardsGigabitRow3Desc),
+            (l10n.ratingSlow,      "🐌", "≥ 80 Mbps",  l10n.ratingStandardsGigabitRow4Desc),
+            (l10n.ratingVerySlow,  "🚫", "< 80 Mbps",  l10n.ratingStandardsGigabitRow5Desc),
           ];
 
     showDialog(
@@ -505,7 +509,7 @@ class _ContentViewState extends State<ContentView> {
           children: [
             Icon(isWifi ? Icons.wifi : Icons.cable, size: 20),
             const SizedBox(width: 8),
-            Text("${mode.label} 評分標準"),
+            Text(l10n.ratingStandardsTitle(mode.localizedLabel(context))),
           ],
         ),
         content: Column(
@@ -515,7 +519,7 @@ class _ContentViewState extends State<ContentView> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
-                  "以實際 TCP 吞吐量為基準，非無線空口速率",
+                  l10n.wifiThroughputNote,
                   style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
@@ -558,7 +562,7 @@ class _ContentViewState extends State<ContentView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text("關閉"),
+            child: Text(l10n.closeButton),
           ),
         ],
       ),

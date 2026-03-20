@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/gigabit_evaluation.dart';
 import '../models/speed_test_mode.dart';
 import '../models/speed_test_result.dart';
@@ -27,6 +28,15 @@ enum SpeedUnit {
 }
 
 class ContentViewModel extends ChangeNotifier {
+  AppLocalizations? _l10n;
+
+  void setL10n(AppLocalizations l10n) {
+    _l10n = l10n;
+    if (_localIP.isEmpty) _localIP = l10n.fetchingIp;
+    if (_progressText.isEmpty) _progressText = l10n.statusNotStarted;
+    notifyListeners();
+  }
+
   SpeedTestMode _mode = SpeedTestMode.server;
   SpeedTestMode get mode => _mode;
   set mode(SpeedTestMode v) {
@@ -34,7 +44,7 @@ class ContentViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _localIP = "獲取中...";
+  String _localIP = "";
   String get localIP => _localIP;
 
   ConnectionType _detectedConnectionType = ConnectionType.unknown;
@@ -51,10 +61,10 @@ class ContentViewModel extends ChangeNotifier {
   }
 
   Future<void> fetchLocalIP() async {
-    _localIP = "獲取中...";
+    _localIP = _l10n?.fetchingIp ?? "";
     notifyListeners();
     final result = await LocalIPHelper.detectNetwork();
-    _localIP = result.ip;
+    _localIP = result.ip.isEmpty ? (_l10n?.ipUnavailable ?? "") : result.ip;
     _detectedConnectionType = result.connectionType;
     if (_autoEvaluationMode) {
       _applyAutoEvaluationMode();
@@ -119,7 +129,7 @@ class ContentViewModel extends ChangeNotifier {
   bool _isRunning = false;
   bool get isRunning => _isRunning;
 
-  String _progressText = "尚未開始";
+  String _progressText = "";
   String get progressText => _progressText;
 
   String _log = "";
@@ -152,12 +162,12 @@ class ContentViewModel extends ChangeNotifier {
     if (_isRunning) return;
     _result = null;
     _log = "";
-    _progressText = "準備中...";
+    _progressText = _l10n?.statusPreparing ?? "Preparing...";
     notifyListeners();
 
     int? p = int.tryParse(_port);
     if (p == null) {
-      _progressText = "埠號不正確";
+      _progressText = _l10n?.statusErrorPort ?? "Invalid port number";
       notifyListeners();
       return;
     }
@@ -168,13 +178,14 @@ class ContentViewModel extends ChangeNotifier {
 
     if (_mode == SpeedTestMode.server) {
       _serverConnectionCount = 0;
-      _appendLog("伺服器啟動，埠 $p，等待連線...");
+      _appendLog(_l10n?.logServerStarted(p) ?? "Server started, port $p, waiting for connection...");
       _tester!.runServer(
         port: p,
+        l10n: _l10n!,
         evaluationMode: _evaluationMode,
         progress: (bytes) {
           double mb = bytes / 1024 / 1024;
-          _progressText = "已接收 ${mb.toStringAsFixed(1)} MB";
+          _progressText = _l10n?.statusReceived(mb.toStringAsFixed(1)) ?? "Received ${mb.toStringAsFixed(1)} MB";
           notifyListeners();
         },
         completion: (res) {
@@ -182,13 +193,13 @@ class ContentViewModel extends ChangeNotifier {
         },
         onNewConnection: (count) {
           _serverConnectionCount = count;
-          _appendLog("新連線 #$count");
+          _appendLog(_l10n?.logNewConnection(count) ?? "New connection #$count");
           notifyListeners();
         },
       );
     } else {
       if (_host.trim().isEmpty) {
-        _progressText = "請輸入伺服器 IP";
+        _progressText = _l10n?.statusErrorNoHost ?? "Please enter server IP";
         _isRunning = false;
         notifyListeners();
         return;
@@ -198,22 +209,24 @@ class ContentViewModel extends ChangeNotifier {
         // Time-bounded mode
         int? dur = int.tryParse(_durationSeconds);
         if (dur == null || dur <= 0) {
-          _progressText = "測試時間不正確";
+          _progressText = _l10n?.statusErrorDuration ?? "Invalid test duration";
           _isRunning = false;
           notifyListeners();
           return;
         }
 
-        _appendLog("客戶端連線到 $_host:$p，時間導向測試 ${dur}s (4 平行串流)...");
+        _appendLog(_l10n?.logClientConnectingTimeBounded(_host, p, dur)
+            ?? "Client connecting to $_host:$p, time-bounded test ${dur}s (4 parallel streams)...");
         _tester!.runClient(
           host: _host,
           port: p,
-          totalSizeMB: 10000, // Large ceiling; actual limit is deadline
+          l10n: _l10n!,
+          totalSizeMB: 10000,
           durationSeconds: dur,
           concurrency: 4,
           progress: (sent) {
             double mb = sent / 1024 / 1024;
-            _progressText = "已傳送 ${mb.toStringAsFixed(1)} MB";
+            _progressText = _l10n?.statusSent(mb.toStringAsFixed(1)) ?? "Sent ${mb.toStringAsFixed(1)} MB";
             notifyListeners();
           },
           completion: (res) {
@@ -221,14 +234,17 @@ class ContentViewModel extends ChangeNotifier {
           },
           retryStatus: (attempt, maxAttempts) {
             if (attempt == 1) {
-              _progressText = "正在連線...";
+              _progressText = _l10n?.statusConnecting ?? "Connecting...";
             } else if (attempt <= 5) {
-              _progressText = "重試連線 ($attempt/$maxAttempts)...";
-              _appendLog("第 $attempt 次連線嘗試...");
+              _progressText = _l10n?.statusRetrying(attempt, maxAttempts)
+                  ?? "Retrying connection ($attempt/$maxAttempts)...";
+              _appendLog(_l10n?.logRetryAttempt(attempt) ?? "Connection attempt #$attempt...");
             } else {
-              _progressText = "等待伺服器啟動... ($attempt/$maxAttempts)";
+              _progressText = _l10n?.statusWaitingServer(attempt, maxAttempts)
+                  ?? "Waiting for server to start... ($attempt/$maxAttempts)";
               if (attempt % 5 == 0) {
-                _appendLog("持續等待伺服器啟動... (第 $attempt 次嘗試)");
+                _appendLog(_l10n?.logWaitingServer(attempt)
+                    ?? "Still waiting for server to start... (attempt $attempt)");
               }
             }
             notifyListeners();
@@ -240,21 +256,24 @@ class ContentViewModel extends ChangeNotifier {
         // Size-bounded mode
         int? size = int.tryParse(_sizeMB);
         if (size == null || size <= 0) {
-          _progressText = "資料大小不正確";
+          _progressText = _l10n?.statusErrorSize ?? "Invalid data size";
           _isRunning = false;
           notifyListeners();
           return;
         }
 
-        _appendLog("客戶端連線到 $_host:$p，傳送 $size MB (4 平行串流)...");
+        _appendLog(_l10n?.logClientConnectingSizeBounded(_host, p, size)
+            ?? "Client connecting to $_host:$p, sending $size MB (4 parallel streams)...");
         _tester!.runClient(
           host: _host,
           port: p,
+          l10n: _l10n!,
           totalSizeMB: size,
           concurrency: 4,
           progress: (sent) {
             double percent = sent / (size * 1024 * 1024) * 100;
-            _progressText = "進度 ${percent.toStringAsFixed(1)}%";
+            _progressText = _l10n?.statusProgress(percent.toStringAsFixed(1))
+                ?? "Progress ${percent.toStringAsFixed(1)}%";
             notifyListeners();
           },
           completion: (res) {
@@ -262,14 +281,17 @@ class ContentViewModel extends ChangeNotifier {
           },
           retryStatus: (attempt, maxAttempts) {
             if (attempt == 1) {
-              _progressText = "正在連線...";
+              _progressText = _l10n?.statusConnecting ?? "Connecting...";
             } else if (attempt <= 5) {
-              _progressText = "重試連線 ($attempt/$maxAttempts)...";
-              _appendLog("第 $attempt 次連線嘗試...");
+              _progressText = _l10n?.statusRetrying(attempt, maxAttempts)
+                  ?? "Retrying connection ($attempt/$maxAttempts)...";
+              _appendLog(_l10n?.logRetryAttempt(attempt) ?? "Connection attempt #$attempt...");
             } else {
-              _progressText = "等待伺服器啟動... ($attempt/$maxAttempts)";
+              _progressText = _l10n?.statusWaitingServer(attempt, maxAttempts)
+                  ?? "Waiting for server to start... ($attempt/$maxAttempts)";
               if (attempt % 5 == 0) {
-                _appendLog("持續等待伺服器啟動... (第 $attempt 次嘗試)");
+                _appendLog(_l10n?.logWaitingServer(attempt)
+                    ?? "Still waiting for server to start... (attempt $attempt)");
               }
             }
             notifyListeners();
@@ -284,8 +306,8 @@ class ContentViewModel extends ChangeNotifier {
   void cancel() {
     _tester?.cancel();
     _isRunning = false;
-    _progressText = "已取消";
-    _appendLog("測試已取消");
+    _progressText = _l10n?.statusCancelled ?? "Cancelled";
+    _appendLog(_l10n?.logCancelled ?? "Test cancelled");
     if (_mode == SpeedTestMode.server) {
       _serverConnectionCount = 0;
     }
@@ -297,8 +319,8 @@ class ContentViewModel extends ChangeNotifier {
     _tester = null;
     _isRunning = false;
     _serverConnectionCount = 0;
-    _progressText = "伺服器已強制停止";
-    _appendLog("伺服器已強制停止");
+    _progressText = _l10n?.statusForceStopped ?? "Server force stopped";
+    _appendLog(_l10n?.logForceStopped ?? "Server force stopped");
     HapticFeedback.heavyImpact();
     notifyListeners();
   }
@@ -309,24 +331,25 @@ class ContentViewModel extends ChangeNotifier {
       HapticFeedback.mediumImpact();
 
       if (_mode == SpeedTestMode.server) {
-        _progressText = "等待連線...";
+        _progressText = _l10n?.statusWaitingConnection ?? "Waiting for connection...";
         _appendLog(_formatResult(_result!));
-        _appendLog("--- 伺服器繼續運行，等待下一個連線 ---");
+        _appendLog(_l10n?.logServerContinues ?? "--- Server continuing, waiting for next connection ---");
       } else {
         _isRunning = false;
-        _progressText = "完成";
+        _progressText = _l10n?.statusDone ?? "Done";
         _appendLog(_formatResult(_result!));
       }
     } else {
       HapticFeedback.vibrate();
+      final errMsg = res.error.toString();
       if (_mode == SpeedTestMode.server) {
-        _progressText = "等待連線...";
-        _appendLog("錯誤：${res.error}");
-        _appendLog("--- 伺服器繼續運行，等待下一個連線 ---");
+        _progressText = _l10n?.statusWaitingConnection ?? "Waiting for connection...";
+        _appendLog(_l10n?.logError(errMsg) ?? "Error: $errMsg");
+        _appendLog(_l10n?.logServerContinues ?? "--- Server continuing, waiting for next connection ---");
       } else {
         _isRunning = false;
-        _progressText = "錯誤：${res.error}";
-        _appendLog("錯誤：${res.error}");
+        _progressText = _l10n?.statusError(errMsg) ?? "Error: $errMsg";
+        _appendLog(_l10n?.logError(errMsg) ?? "Error: $errMsg");
       }
     }
     notifyListeners();
@@ -351,6 +374,16 @@ class ContentViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  String _localizedModeLabel(EvaluationMode m) {
+    if (_l10n == null) return m.label;
+    switch (m) {
+      case EvaluationMode.gigabit:
+        return _l10n!.evaluationModeGigabit;
+      case EvaluationMode.wifi:
+        return _l10n!.evaluationModeWifi;
+    }
+  }
+
   String _formatResult(SpeedTestResult r) {
     final eval = r.evaluation;
     final totalMB = (r.transferredBytes / 1024 / 1024).toStringAsFixed(2);
@@ -367,29 +400,33 @@ class ContentViewModel extends ChangeNotifier {
     final theoreticalStr = theoreticalVal.toStringAsFixed(0);
 
     final percentStr = eval.performancePercent.toStringAsFixed(1);
+    final modeLabel = _localizedModeLabel(eval.mode);
 
+    final l = _l10n;
     final buffer = StringBuffer();
-    buffer.writeln("--- 測試結果 ---");
-    buffer.writeln("總量: $totalMB MB");
-    buffer.writeln("耗時: $durationStr 秒");
-    buffer.writeln("速度: $speedStr $unitStr");
+    buffer.writeln(l?.logResultHeader ?? "--- Test Result ---");
+    buffer.writeln(l?.logResultTotal(totalMB) ?? "Total: $totalMB MB");
+    buffer.writeln(l?.logResultDuration(durationStr) ?? "Duration: $durationStr sec");
+    buffer.writeln(l?.logResultSpeed(speedStr, unitStr) ?? "Speed: $speedStr $unitStr");
     if (r.p50SpeedMBps != null) {
       final p50Val = _selectedUnit.convertFromMBps(r.p50SpeedMBps!);
-      buffer.writeln("P50 (中位數持續): ${p50Val.toStringAsFixed(2)} $unitStr");
+      buffer.writeln(l?.logResultP50(p50Val.toStringAsFixed(2), unitStr)
+          ?? "P50 (median sustained): ${p50Val.toStringAsFixed(2)} $unitStr");
     }
     if (r.p90SpeedMBps != null) {
       final p90Val = _selectedUnit.convertFromMBps(r.p90SpeedMBps!);
-      buffer.writeln("P90 (峰值持續): ${p90Val.toStringAsFixed(2)} $unitStr");
+      buffer.writeln(l?.logResultP90(p90Val.toStringAsFixed(2), unitStr)
+          ?? "P90 (peak sustained): ${p90Val.toStringAsFixed(2)} $unitStr");
     }
     buffer.writeln("");
-    buffer.writeln("--- ${eval.mode.label} 評估 ---");
-    buffer.writeln("實際速度: $evalSpeed $unitStr");
-    buffer.writeln("理論: $theoreticalStr $unitStr");
-    buffer.writeln("達成比例: $percentStr %");
-    buffer.writeln("評級: ${eval.icon} ${eval.rating}");
-    buffer.writeln("建議: ${eval.message}");
+    buffer.writeln(l?.logResultEvalHeader(modeLabel) ?? "--- $modeLabel Evaluation ---");
+    buffer.writeln(l?.logResultActualSpeed(evalSpeed, unitStr) ?? "Actual speed: $evalSpeed $unitStr");
+    buffer.writeln(l?.logResultTheoretical(theoreticalStr, unitStr) ?? "Theoretical: $theoreticalStr $unitStr");
+    buffer.writeln(l?.logResultPercent(percentStr) ?? "Achievement: $percentStr%");
+    buffer.writeln(l?.logResultRating(eval.icon, eval.rating) ?? "Rating: ${eval.icon} ${eval.rating}");
+    buffer.writeln(l?.logResultSuggestion(eval.message) ?? "Suggestion: ${eval.message}");
     if (eval.suggestions.isNotEmpty) {
-      buffer.writeln("改善建議:");
+      buffer.writeln(l?.logResultImprovements ?? "Improvement tips:");
       for (var s in eval.suggestions) {
         buffer.writeln("• $s");
       }
