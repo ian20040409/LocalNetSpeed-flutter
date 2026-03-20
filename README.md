@@ -6,7 +6,7 @@
 
 ---
 
-## English
+##### English
 
 A high-performance local network speed testing tool built with Flutter. This application allows you to measure the data transfer rate between two devices on the same local network using a Client-Server architecture.
 
@@ -137,7 +137,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 繁體中文
+#### 繁體中文
+[English](#english) | [繁體中文](#繁體中文)
 
 一個以 Flutter 構建的高性能區域網路速度測試工具。此應用程式允許您使用用戶端-伺服器架構測量同一區域網路上兩個設備之間的數據傳輸速率。
 
